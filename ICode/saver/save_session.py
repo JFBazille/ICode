@@ -1,5 +1,5 @@
 import sys
-import data_class as dat
+import ICode.data_class as dat
 import pickle
 
 def save_session(title =' ', masker = None, signal = None,H = None, image = None,

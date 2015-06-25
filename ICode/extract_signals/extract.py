@@ -1,6 +1,7 @@
 import time
 from nilearn.input_data import NiftiMasker
-
+##This variable is should contain the path to your Nifti data you want to load
+PATH_TO_SAVE_DATA = '/volatile/hubert/datas/rois_filter'
 def extract_rois_signals(preprocessing_folder ='pipeline_2', prefix= 'resampled_wr'):
     dataset = load_dynacomp(preprocessing_folder = preprocessing_folder,prefix = prefix)
     for idx, func in enumerate([dataset.func1, dataset.func2]):
@@ -28,7 +29,7 @@ def extract_rois_signals(preprocessing_folder ='pipeline_2', prefix= 'resampled_
 	print 'masker'
 	x = masker.fit_transform(func[i])
 	print x
-	np.save(os.path.join('/volatile/hubert/datas/rois_filter','output' + str(i+1) +'_rois_filter'),x)
+	np.save(os.path.join(PATH_TO_SAVE_DATA,'output' + str(i+1) +'_rois_filter'),x)
 	
       print time.clock() - tic
       

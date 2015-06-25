@@ -1,10 +1,8 @@
-import sys
-sys.path.append('/volatile/hubert/HCode/')
 import numpy as np
 import scipy.io as scio
 from math import ceil
 def get_simulation_from_picture(picture = None, lsimul= 4096):
-  f = scio.loadmat('/volatile/hubert/datas/simulations/simulationsfGn2.mat')
+  f = scio.loadmat('ICode/simulations/simulationsfGn2.mat')
   simulations = f['simulations']
   n = simulations.shape[1]
   if(picture is None):
