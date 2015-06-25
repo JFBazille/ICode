@@ -1,0 +1,9 @@
+import sys
+sys.path.append('/volatile/hubert/HCode/')
+import opas
+from Estimators import penalyzed as pen
+import numpy as np
+s = opas.square(10)
+signal = opas.get_simulation_from_picture(s)
+signalshape = signal.shape
+sig = np.reshape(signal,(signalshape[0]*signalshape[1],signalshape[2]))

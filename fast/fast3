@@ -1,0 +1,7 @@
+import nitime.algorithms.spectral as nas
+import matplotlib.pyplot as plt
+import numpy as np
+
+f,pw =  nas.get_spectra(datanorm)
+plt.plot(np.log10(f),np.log10(pw))
+plt.show()

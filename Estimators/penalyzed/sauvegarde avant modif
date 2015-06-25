@@ -1,0 +1,167 @@
+def JH22bis(Haest,shape,yij,varyj,nj, j1,j2,l=1, wtype=1):
+  """
+  Haest is the concatenation of H and aest,
+  shape is the shape of the original image
+  """
+  #on commence par la partie en f(H)
+  jj = np.arange(j1-1,j2)
+  J = len(jj)
+  njj=nj[jj]
+  n = len(Haest)
+  H = Haest[:n/2]
+  aest = Haest[n/2:]
+  djh = 2*np.outer(H,jj) + np.outer(aest,np.ones(len(jj))) 
+  S = (yij[:,jj] - djh)**2
+  N= sum(njj)
+  if     wtype==0:#  % uniform weights
+    wvarjj = nancynp.ones(J)   
+    wstr = 'Uniform'
+  elif wtype==1:#  % Gaussian type weights
+    wvarjj = njj/N        
+    wstr = 'Gaussian'
+  elif  wtype==2:#   % weights from data 
+    wvarjj = 1/varyjj
+    wstr = 'Estimated'
+  else :#% all other cases
+    print '** Weight option not recognised, using uniform weights\n'
+    wvarjj = np.ones(1,J) 
+    wstr = 'Uniform'
+  
+  #then we multiply S by the pounderation
+  S = S.dot(wvarjj)
+  #and we return the summ
+  return sum(S)+l*np.sum(np.array(o.hgrad(np.reshape(H,shape)))**2)
+
+def GradJH22bis(Haest,shape,yij,varyj,nj, j1,j2,l=0, wtype=1):
+  jj = np.arange(j1-1,j2)
+  J = len(jj)
+  njj=nj[jj]
+  N=sum(njj)
+  n = len(Haest)
+  H = Haest[:n/2]
+  aest = Haest[n/2:]
+  #djh pour 2jH
+  djh = 2*np.outer(H,jj) + np.outer(aest,np.ones(len(jj)))
+  
+  if     wtype==0:#  % uniform weights
+    wvarjj = nancynp.ones(J)   
+    wstr = 'Uniform'
+  elif wtype==1:#  % Gaussian type weights
+    wvarjj = njj/N        
+    wstr = 'Gaussian'
+  elif  wtype==2:#   % weights from data 
+    wvarjj = 1/varyjj
+    wstr = 'Estimated'
+  else :#% all other cases
+    print '** Weight option not recognised, using uniform weights\n'
+    wvarjj = np.ones(1,J) 
+    wstr = 'Uniform'
+  #on calcule la parti du gradiant en aest
+  G = -2*(yij[:,jj] - djh)
+  #Gaest = 0.5*(G.dot(wvarjj) + G.dot(np.ones(len(jj))))
+  #Gaest = G.dot(np.ones(len(jj)))
+  Gaest = G.dot(wvarjj)
+  #on peut reutiliser G pour le calcul pour S
+  S = 2*G.dot(jj*wvarjj)
+  GH = S - 2*l*np.reshape(o.hlaplacian(np.reshape(H,shape)),H.shape)
+  #return np.reshape((S + 2*l*H),(1,len(H))) au cas ou on veuille regarder le chack_gradient terme a terme
+
+  return np.concatenate((GH,Gaest))
+
+
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+
+
+def JHu(H,aest,shape,yij,varyj,nj, j1,j2,l=1, wtype=1):
+  return f(H,aest,yij,varyj,nj, j1,j2, wtype=1)+l*np.sum(np.array(o.hgrad(np.reshape(H,shape)))**2)
+
+def GradJHu(H,aest,shape,yij,varyj,nj, j1,j2,l=1, wtype=1):
+  return Gradf(H,aest,yij,varyj,nj, j1,j2, wtype=1) + 2*l*np.reshape(o.hflap(np.reshape(H,shape)),H.shape)
+
+def GradJHud(H,aest,shape,yij,varyj,nj, j1,j2,epsilon =1,l=1, wtype=1):
+  return Gradf(H,aest,yij,varyj,nj, j1,j2, wtype=1) + l*np.reshape(o.hflapd(np.reshape(H,shape),epsilon = epsilon),H.shape)
+
+
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## 
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+
+
+
+#this function is the same objective function
+#but we use also aest as a variable ! and see if it yields a different result
+#Haest is a 2n array, the n first term are H and the n last aest, it is as simple as that !
+def JHubis(Haest,shape,yij,varyj,nj, j1,j2,l=1, wtype=1):
+  """
+  Haest is the concatenation of H and aest,
+  shape is the shape of the original image
+  """
+  #on commence par la partie en f(H)
+  jj = np.arange(j1-1,j2)
+  J = len(jj)
+  njj=nj[jj]
+  n = len(Haest)
+  H = Haest[:n/2]
+  aest = Haest[n/2:]
+  djh = 2*np.outer(H,jj) + np.outer(aest,np.ones(len(jj))) 
+  S = (yij[:,jj] - djh)**2
+  N= sum(njj)
+  if     wtype==0:#  % uniform weights
+    wvarjj = nancynp.ones(J)   
+    wstr = 'Uniform'
+  elif wtype==1:#  % Gaussian type weights
+    wvarjj = njj/N        
+    wstr = 'Gaussian'
+  elif  wtype==2:#   % weights from data 
+    wvarjj = 1/varyjj
+    wstr = 'Estimated'
+  else :#% all other cases
+    print '** Weight option not recognised, using uniform weights\n'
+    wvarjj = np.ones(1,J) 
+    wstr = 'Uniform'
+  
+  #then we multiply S by the pounderation
+  S = S.dot(wvarjj)
+  #and we return the summ
+  return sum(S)+l*np.sum(np.array(o.hgrad(np.reshape(H,shape)))**2)
+
+def GradJHubis(Haest,shape,yij,varyj,nj, j1,j2,l=0, wtype=1):
+  jj = np.arange(j1-1,j2)
+  J = len(jj)
+  njj=nj[jj]
+  N=sum(njj)
+  n = len(Haest)
+  H = Haest[:n/2]
+  aest = Haest[n/2:]
+  #djh pour 2jH
+  djh = 2*np.outer(H,jj) + np.outer(aest,np.ones(len(jj)))
+  
+  if     wtype==0:#  % uniform weights
+    wvarjj = nancynp.ones(J)   
+    wstr = 'Uniform'
+  elif wtype==1:#  % Gaussian type weights
+    wvarjj = njj/N        
+    wstr = 'Gaussian'
+  elif  wtype==2:#   % weights from data 
+    wvarjj = 1/varyjj
+    wstr = 'Estimated'
+  else :#% all other cases
+    print '** Weight option not recognised, using uniform weights\n'
+    wvarjj = np.ones(1,J) 
+    wstr = 'Uniform'
+  #on calcule la parti du gradiant en aest
+  G = -2*(yij[:,jj] - djh)
+  #Gaest = 0.5*(G.dot(wvarjj) + G.dot(np.ones(len(jj))))
+  #Gaest = G.dot(np.ones(len(jj)))
+  Gaest = G.dot(wvarjj)
+  #on peut reutiliser G pour le calcul pour S
+  S = 2*G.dot(jj*wvarjj)
+  GH = S +l*np.reshape(o.hflap(np.reshape(H,shape)),H.shape)
+  #return np.reshape((S + 2*l*H),(1,len(H))) au cas ou on veuille regarder le chack_gradient terme a terme
+
+  return np.concatenate((GH,Gaest))

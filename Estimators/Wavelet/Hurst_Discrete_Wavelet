@@ -1,0 +1,20 @@
+import numpy as np
+import pywt
+
+def Hurst_by_Wt4(data):
+  #Pour 1 et 31 je ne sais pas on va essayer comme ca apres on essaiera de comprendre
+  J= 2**np.arange(3,6)
+  #le top ce serait de pouvoir rentrer des tableaux 2D
+  #mais je ne suis pas sur que cela soit possible, on verra
+  cwtmatr = signal.cwt(data,signal.ricker, J)
+  #on moyenne notre cwtmatr sur la dimension temporelle il faut que ce soit la derniere
+  S = np.mean(cwtmatr**2, axis =1)
+
+  #plt.imshow(cwtmatr, extent=[-1, 1, 1, 31], cmap='PRGn', aspect='auto',
+  #         vmax=abs(cwtmatr).max(), vmin=-abs(cwtmatr).max())
+  
+
+  tmp = np.polyfit(np.log2(S),np.arange(3,6),deg =1)
+  H = tmp[0]
+  #on prie pour que tout marche
+  return {'H':H, 'J':J,'S':S}
