@@ -1,4 +1,4 @@
-import Optimize as o
+import ICode.Optimize as o
 import numpy as np
 def fmrd(H,aest,yij,varyj,nj, j1,j2,mask, wtype=1):
   shape = mask.shape

@@ -96,7 +96,7 @@ def wtspecq_statlog3(appro,N,norm,q,nbvoies,distn,printout) :
   if distn==0:#   %% GAUSSIEN
     #%--- Load tabulated values of Expectation and variances for |N(0,1)|^q. for Gaussian case
     #load varndq_gauss_tab
-    loadeddata = scio.loadmat('/volatile/hubert/HCode/Estimators/Wavelet/varndq_gauss_tab.mat')
+    loadeddata = scio.loadmat('ICode/Estimators/Wavelet/varndq_gauss_tab.mat')
     Nlim = np.reshape(loadeddata['Nlim'],11)
     Ntab = np.reshape(loadeddata['Ntab'],12)
     biaisgauss_tab = loadeddata['biaisgauss_tab']
@@ -260,7 +260,7 @@ def wtspecq_statlog32(appro,N,norm,q,nbvoies,distn,printout) :
   if distn==0:#   %% GAUSSIEN
     #%--- Load tabulated values of Expectation and variances for |N(0,1)|^q. for Gaussian case
     #load varndq_gauss_tab
-    loadeddata = scio.loadmat('/volatile/hubert/HCode/Estimators/Wavelet/varndq_gauss_tab.mat')
+    loadeddata = scio.loadmat('ICode/Estimators/Wavelet/varndq_gauss_tab.mat')
     Nlim = np.reshape(loadeddata['Nlim'],11)
     Ntab = np.reshape(loadeddata['Ntab'],12)
     biaisgauss_tab = loadeddata['biaisgauss_tab']

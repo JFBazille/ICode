@@ -1,7 +1,7 @@
 #Wavelet estimator penalisation L2 first and simpler penalization
 import numpy as np
 from scipy.ndimage.filters import laplace
-import Optimize as o
+import ICode.Optimize as o
 #this function is the objective function
 #J = sum(f(Hi)) + normel2(H)^2
 #where f(Hi) is the norme L2 of the difference between the estimated coefficient H
