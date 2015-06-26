@@ -1,10 +1,8 @@
-import sys
-sys.path.append('/volatile/hubert/HCode/')
-import opas
-from Estimators import penalyzed as pen
+import ICode.opas as opas
+from ICode.Estimators import penalyzed as pen
 import numpy as np
 import matplotlib.pyplot as plt
-from Estimators.Wavelet.HDW_plagiate import *
+from ICode.Estimators.Wavelet.HDW_plagiate import *
 l=4096
 
 j1=3

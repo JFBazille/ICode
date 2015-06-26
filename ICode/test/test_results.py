@@ -1,7 +1,9 @@
+
+
 import pickle
 import matplotlib.pyplot as plt
 import numpy as np
-with open('/volatile/hubert/HCode/Results/resultatTest','rb') as fichier:
+with open('ICode/Results/resultatTest','rb') as fichier:
   monunpickler = pickle.Unpickler(fichier)
   donnees = monunpickler.load()
 

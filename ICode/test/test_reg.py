@@ -1,14 +1,15 @@
-import sys
-sys.path.append('/volatile/hubert/HCode/')
+##This file needs /volatile/hubert/datas/sortiewt file you don"t necesseraly have !
+## It is the out put of the Matlab function wtspecq_statlog3
+
 import scipy.io as scio
 import numpy as np
-from ProgressBar import ProgressBar
+from ICode.ProgressBar import ProgressBar
 import matplotlib.pyplot as plt
-import Estimators.Wavelet as EW
+import ICode.Estimators.Wavelet as EW
 import time
 tic = time.time()
 g = scio.loadmat('/volatile/hubert/datas/sortiewt')
-from Estimators.Wavelet.HDW_plagiate import *
+from ICode.Estimators.Wavelet.HDW_plagiate import *
 
 N = g['N']
 Elogmuqj=g['Elogmuqj']

@@ -1,11 +1,8 @@
-import sys
-sys.path.append('/volatile/hubert/HCode/')
-
 import numpy as np
-import Optimize as o
+import ICode.Optimize as o
 from scipy.optimize import approx_fprime as approx
 import matplotlib.pyplot as plt
-import opas
+import ICode.opas as opas
 
 s = opas.square()
 shape = s.shape

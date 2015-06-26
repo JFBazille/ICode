@@ -1,14 +1,12 @@
 #This Code test our Hexp_Welchp function gives mean and var
 #of the estimate Hurst exponent
-import sys
-sys.path.append('/volatile/hubert/HCode/')
 import scipy.io as scio
 import numpy as np
 import pickle
 import matplotlib.pyplot as plt
-from Estimators.Hexp_Welchp import Hurstexp_Welchper as HW
+from ICode.Estimators.Hexp_Welchp import Hurstexp_Welchper as HW
 #from Estimators.Hexp_Welchp import Hurstexp_Welchper_scipy as HWs
-f = scio.loadmat('/volatile/hubert/datas/simulations/simulationsfGn2.mat')
+f = scio.loadmat('ICode/simulations/simulationsfGn2.mat')
 
 simulations = f['simulations']
 #number of different h
@@ -30,7 +28,7 @@ for i in np.arange(0,n):
 donnees = {'Welch_nitime_per01' : estimate01,'Welch_,nitime_per005' :estimate005}#,
 	   #'Welch_scipy_per01' : estimate_s01, 'Welch_scipy_per005' :estimate_s005} 
 #s ='Welch_per'
-#with open('/volatile/hubert/datas/simulations/Python_'+s+'_results514_norm','w') as fichier:
+#with open('ICode/simulations/Python_'+s+'_results514_norm','w') as fichier:
   #monpickler = pickle.Pickler(fichier)
   #monpickler.dump(donnees)  
 

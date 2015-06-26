@@ -1,16 +1,14 @@
 #This Code test our Hexp_Welchp function gives mean and var
 #of the estimate Hurst exponent
-import sys
-sys.path.append('/volatile/hubert/HCode/')
 import scipy.io as scio
 import numpy as np
-from ProgressBar import ProgressBar
+from ICode.ProgressBar import ProgressBar
 import matplotlib.pyplot as plt
-import Estimators.Wavelet as EW
+import ICode.Estimators.Wavelet as EW
 import time
-from Estimators.Wavelet.Hurst_Discrete_Wavelet import Hurst_DWt2
+from ICode.Estimators.Wavelet.Hurst_Discrete_Wavelet import Hurst_DWt2
 tic = time.time()
-f = scio.loadmat('/volatile/hubert/datas/simulations/simulationsfGn2.mat')
+f = scio.loadmat('ICode/simulations/simulationsfGn2.mat')
 #f = scio.loadmat('/volatile/hubert/datas/simulations/simulationsfBn.mat')
 simulations = f['simulations']
 #number of different h

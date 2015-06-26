@@ -1,18 +1,14 @@
 ##This function has been implemented to test wepl2
-import sys
-sys.path.append('/volatile/hubert/HCode/')
-import scipy.io as scio
 import numpy as np
-from ProgressBar import ProgressBar
+from ICode.ProgressBar import ProgressBar
 import matplotlib.pyplot as plt
 from matplotlib.colors import Normalize
 import time
 tic = time.time()
-f = scio.loadmat('/volatile/hubert/datas/simulations/simulationsfGn2.mat')
 from scipy.optimize import fmin_l_bfgs_b, check_grad
-from Estimators import penalyzed
-import opas
-from Estimators.Wavelet.HDW_plagiate import *
+from ICode.Estimators import penalyzed
+import ICode.opas as opas
+from ICode.Estimators.Wavelet.HDW_plagiate import *
 from scipy.ndimage.filters import gaussian_filter
 from math import ceil
 from scipy.optimize import approx_fprime as approx

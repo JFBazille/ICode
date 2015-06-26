@@ -6,11 +6,11 @@ import scipy.io as scio
 import numpy as np
 import pickle
 import matplotlib.pyplot as plt
-from Estimators.Hexp_Welchp import Hurstexp_Welchper as HW
-from Estimators.DFA import DFA
-from Estimators.Whittle import Whittle
-import pickle
-f = scio.loadmat('/volatile/hubert/datas/simulations/simulationsfGn2.mat')
+from ICode.Estimators.Hexp_Welchp import Hurstexp_Welchper as HW
+from ICode.Estimators.DFA import DFA
+from ICode.Estimators.Whittle import Whittle
+
+f = scio.loadmat('ICode/simulations/simulationsfGn2.mat')
 
 simulations = f['simulations']
 #number of different h
@@ -44,6 +44,6 @@ donnees = {'Whittle_4096' : whittlel,'Whittle_514' : whittles}
 ###DFA
 #donnees = {'DFA_4096' : dfal,'DFA_514' : dfas}
 
-with open('/volatile/hubert/HCode/Results/resultat_test_whittle','wb') as fichier:
+with open('ICode/Results/resultat_test_whittle','wb') as fichier:
   monpickler = pickle.Pickler(fichier)
   monpickler.dump(donnees)
