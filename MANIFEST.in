@@ -1,2 +1,4 @@
 include *.md
 recursive-include ICode simulations *.mat
+recursive-include ICode Estimator Wavelet *.mat
+recursive-include Results *
