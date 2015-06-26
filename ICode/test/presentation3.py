@@ -6,7 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-with open('/volatile/hubert/HCode/Results/resultat_test_estimators','rb') as fichier:
+with open('ICode/Results/resultat_test_estimators','rb') as fichier:
   unpickler = pickle.Unpickler(fichier)
   donnees = unpickler.load()
 
@@ -14,7 +14,7 @@ pwave_514 = donnees['Wavelet_514']
 pwave_4096 = donnees['Wavelet_4096']
 
 
-mdata = scio.loadmat('/volatile/hubert/datas/simulations/matlab_wavelet_estimations.mat')
+mdata = scio.loadmat('ICode/simulations/matlab_wavelet_estimations.mat')
 mwave_4096 = mdata['matlab_wavelet_4096']
 mwave_514 = mdata['matlab_wavelet_514']
 

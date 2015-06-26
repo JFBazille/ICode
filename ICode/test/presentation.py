@@ -3,15 +3,15 @@ import pickle
 import numpy as np
 import matplotlib.pyplot as plt
 
-mdata = scio.loadmat('/volatile/hubert/datas/simulations/matlab_estimations_4096.mat')
+mdata = scio.loadmat('ICode/simulations/matlab_estimations_4096.mat')
 mdfal = mdata['dfa']
 mwhittlel = mdata['whittle']
 
-mdata = scio.loadmat('/volatile/hubert/datas/simulations/matlab_estimations_514.mat')
+mdata = scio.loadmat('ICode//simulations/matlab_estimations_514.mat')
 mdfas = mdata['dfa']
 mwhittles = mdata['whittle']
 
-with open('/volatile/hubert/HCode/Results/resultat_test_estimators','rb') as fichier:
+with open('ICode/Results/resultat_test_estimators','rb') as fichier:
   unpickler = pickle.Unpickler(fichier)
   donnees = unpickler.load()
 

@@ -2,9 +2,10 @@
 #of the estimate Hurst exponent
 import scipy.io as scio
 import numpy as np
-execfile('/volatile/hubert/HCode/DFA.py')
-execfile('/volatile/hubert/HCode/Whittle.py')
-f = scio.loadmat('/volatile/hubert/datas/simulations/simulationsfGn514.mat')
+from ICode.Estimators import WhittleS
+from ICode.Estimators import DFAS
+
+f = scio.loadmat('ICode/simulations/simulationsfGn514.mat')
 
 simulations = f['simulations']
 

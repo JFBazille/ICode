@@ -2,9 +2,10 @@
 #of the estimate Hurst exponent
 import scipy.io as scio
 import numpy as np
-execfile('/volatile/hubert/HCode/Welch.py')
+from ICode.Estimators import Welch
 
-f = scio.loadmat('/volatile/hubert/datas/simulations/simulationsfGn514.mat')
+f = scio.loadmat('ICode/simulations/simulationsfGn514.mat')
+
 
 simulations = f['simulations']
 #number of different h

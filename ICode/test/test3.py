@@ -1,36 +1,33 @@
 ##This Code test our DFA and Whittle function gives mean and var
 ##of the estimate Hurst exponent
-#import scipy.io as scio
-#import numpy as np
-#execfile('/volatile/hubert/HCode/DFA.py')
-#execfile('/volatile/hubert/HCode/Whittle.py')
+import scipy.io as scio
+import numpy as np
+from ICode.Estimators import WhittleS
+from ICode.Estimators import DFAS
 
+f = scio.loadmat('ICode/simulations/simulationsfGn2.mat')
 
+simulations = f['simulations']
+#number of different h
+n = simulations.shape[0]
+#number of simulation for a given h
+N = simulations.shape[1]
+#length of simulation
+l = simulations.shape[2]
 
-
-#f = scio.loadmat('/volatile/hubert/datas/simulations/simulationsfGn2.mat')
-
-#simulations = f['simulations']
-##number of different h
-#n = simulations.shape[0]
-##number of simulation for a given h
-#N = simulations.shape[1]
-##length of simulation
-#l = simulations.shape[2]
-
-#dfai2 = np.zeros((n,N))
-#whittlei2= np.zeros((n,N))
-#for i in np.arange(0,n):
-  ##We define anonymous functions that will be usefull
-  #w2 = lambda idx : WhittleS(simulations[i,:,:514],idx)
-  #d2 = lambda idx : DFAS(simulations[i,:,:514],idx)
-  ##we lauch the threads !
-  #for j in range(N):
-    #dfai2[i,j] = d2(j)
-    #whittlei2[i,j] = w2(j)
+dfai2 = np.zeros((n,N))
+whittlei2= np.zeros((n,N))
+for i in np.arange(0,n):
+  #We define anonymous functions that will be usefull
+  w2 = lambda idx : WhittleS(simulations[i,:,:514],idx)
+  d2 = lambda idx : DFAS(simulations[i,:,:514],idx)
+  #we lauch the threads !
+  for j in range(N):
+    dfai2[i,j] = d2(j)
+    whittlei2[i,j] = w2(j)
   
 for s in ['DFA', 'Whittle']:
-  f = open('/volatile/hubert/datas/simulations/Python_'+s+'_results514','w')
+  f = open('ICode/simulations/Python_'+s+'_results514','w')
   
   if s == 'Whittle':
     f.write('\n\n------------Whittle-----------------------\n \n')

@@ -1,6 +1,4 @@
-import sys
-sys.path.append('/volatile/hubert/HCode')
-import data_class as dat
+import ICode.data_class as dat
 import pickle
 
 fichier ='/volatile/hubert/datas/mysession'

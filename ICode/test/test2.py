@@ -2,13 +2,10 @@
 #of the estimate Hurst exponent
 import scipy.io as scio
 import numpy as np
-execfile('/volatile/hubert/HCode/DFA.py')
-execfile('/volatile/hubert/HCode/Whittle.py')
+from ICode.Estimators import WhittleS
+from ICode.Estimators import DFAS
 
-
-
-
-f = scio.loadmat('/volatile/hubert/datas/simulations/simulationsfGn2.mat')
+f = scio.loadmat('ICode/simulations/simulationsfGn2.mat')
 
 simulations = f['simulations']
 #number of different h
@@ -30,7 +27,7 @@ for i in np.arange(0,n):
     whittlei[i,j] = w(j)
   
 for s in ['DFA', 'Whittle']:
-  f = open('/volatile/hubert/datas/simulations/Python_'+s+'_results','w')
+  f = open('ICode/simulations/Python_'+s+'_results','w')
   
   if s == 'Whittle':
     f.write('\n\n------------Whittle-----------------------\n \n')

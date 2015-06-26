@@ -1,14 +1,11 @@
-
-import sys
-sys.path.append('/volatile/hubert/HCode/')
 import scipy.io as scio
 import numpy as np
 from nitime.analysis.spectral import SpectralAnalyzer
 from nitime.timeseries import TimeSeries
 import matplotlib.pyplot as plt
-from Estimators.Wavelet.HDW_plagiate import *
+from ICode.Estimators.Wavelet.HDW_plagiate import *
 from matplotlib.colors import Normalize
-f = scio.loadmat('/volatile/hubert/datas/simulations/simulationsfGn2.mat')
+f = scio.loadmat('ICode/simulations/simulationsfGn2.mat')
 
 simulations = f['simulations']
 ## Plotter signal 1D pour H = 0.8
