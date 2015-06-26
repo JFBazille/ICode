@@ -5,20 +5,19 @@
 import matplotlib.pyplot as plt
 from nilearn.region import signals_to_img_maps
 from nilearn.plotting import plot_img, plot_stat_map
-import sys, os, time
+import os, time
 import numpy as np
-sys.path.append('/volatile/hubert/Code/post_learning_analysis')
-sys.path.append('/volatile/hubert/HCode')
 import time
-from loader import load_dynacomp
 from nilearn.input_data import NiftiMapsMasker
 from nilearn.input_data import NiftiMasker
-from extract_signals.extract import extract_one_vpv_signal
-import opas
-from Estimators import penalyzed
 from scipy.ndimage.filters import gaussian_filter
 from scipy.optimize import fmin_l_bfgs_b
-from Estimators.Wavelet.HDW_plagiate import *
+
+from ICode.Estimators.Wavelet.HDW_plagiate import *
+import ICode.opas
+from ICode.Estimators import penalyzed
+from ICode.loader import load_dynacomp
+from ICode.extract_signals.extract import extract_one_vpv_signal
 ##Chargement des donnees prend du temps a voir si besoin
 dataset = load_dynacomp(preprocessing_folder ='pipeline_1', prefix= 'swr')
 

@@ -8,15 +8,16 @@ from nilearn.plotting import plot_roi
 from nilearn.plotting import plot_img, plot_stat_map
 import sys, os, time
 import numpy as np
-sys.path.append('/volatile/hubert/Code/post_learning_analysis')
-sys.path.append('/volatile/hubert/HCode')
 import time
-from loader import load_dynacomp, dict_to_list
+
+
 from nilearn.input_data import NiftiMapsMasker
 from nilearn.input_data import NiftiMasker
-from extract_signals.extract import extract_one_vpv_signal
 
-from Estimators.Hexp_Welchp import Hurstexp_Welchper_2 as HW
+from ICode.loader import load_dynacomp, dict_to_list
+from ICode.extract_signals.extract import extract_one_vpv_signal
+
+from ICode.Estimators.Hexp_Welchp import Hurstexp_Welchper_2 as HW
 #from Estimators.Hexp_Welchp import Hurstexp_Welchper_scipy as HWs
 
 

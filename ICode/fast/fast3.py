@@ -1,15 +1,12 @@
-#import sys
-#sys.path.append('/volatile/hubert/HCode')
-#import nitime.algorithms.spectral as nas
-#from scipy.signal import welch
-#import matplotlib.pyplot as plt
-#import Estimators as es
-#import numpy as np
-#import pickle
-#import data_class as dat
-#execfile('/volatile/hubert/HCode/Estimators/Welch.py')
-execfile('/volatile/hubert/HCode/Estimators/Welchp.py')
-#execfile('/volatile/hubert/HCode/Estimators/DFA.py')
+import sys
+import nitime.algorithms.spectral as nas
+from scipy.signal import welch
+import matplotlib.pyplot as plt
+import ICode.Estimators as es
+import numpy as np
+import pickle
+import ICode.data_class as dat
+
 
 #with open('/volatile/hubert/datas/mysession2', 'rb') as myfile:
    #monunpickler = pickle.Unpickler(myfile)

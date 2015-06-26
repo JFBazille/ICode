@@ -4,18 +4,17 @@
 	#on real datas
 import matplotlib.pyplot as plt
 from nilearn.plotting import plot_img, plot_stat_map
-import sys, os, time
+import  os, time
 import numpy as np
-sys.path.append('/volatile/hubert/Code/post_learning_analysis')
-sys.path.append('/volatile/hubert/HCode')
-from Estimators.penalyzed import JHmrd,GradJHmrd
 import time
-from loader import load_dynacomp
 from nilearn.input_data import NiftiMapsMasker
 from nilearn.input_data import NiftiMasker
-from extract_signals.extract import extract_one_vpv_signal
-from Estimators.Wavelet import *
-from ProgressBar import ProgressBar
+
+from ICode.extract_signals.extract import extract_one_vpv_signal
+from ICode.Estimators.Wavelet import *
+from ICode.ProgressBar import ProgressBar
+from ICode.loader import load_dynacomp
+from ICode.Estimators.penalyzed import JHmrd,GradJHmrd
 #from scipy.optimize import approx_fprime as approx
 from scipy.optimize import fmin_l_bfgs_b#, check_grad
 ##Chargement des donnees prend du temps a voir si besoin

@@ -3,9 +3,8 @@ from nilearn.plotting import plot_roi
 from nilearn.plotting import plot_img, plot_stat_map
 import sys, os, time
 import numpy as np
-sys.path.append('/volatile/hubert/Code/post_learning_analysis')
 
-from loader import load_dynacomp, dict_to_list
+from ICode.loader import load_dynacomp, dict_to_list
 from nilearn.input_data import NiftiMapsMasker
 from nilearn.input_data import NiftiMasker
 ##Le module Thread ne permet pas de faire un parallelisme veritable
@@ -13,8 +12,6 @@ from nilearn.input_data import NiftiMasker
 #from threading import Thread
 from multiprocessing import Process
 
-execfile('/volatile/hubert/HCode/Estimators/welchnitime.py')
-execfile('/volatile/hubert/HCode/extract_signals.py')
 ##Chargement des donnees prend du temps a voir si besoin
 dataset = load_dynacomp(preprocessing_folder ='pipeline_2', prefix= 'resampled_wr')
 
