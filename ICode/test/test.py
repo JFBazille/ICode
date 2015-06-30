@@ -2,16 +2,16 @@
 #of the estimate Hurst exponent
 import scipy.io as scio
 import numpy as np
-from ICode.Estimators import WhittleS
-from ICode.Estimators import DFAS
+from ICode.Estimators import whittle_s
+from ICode.Estimators import dfa_s
 
 f = scio.loadmat('ICode/simulations/simulationsfGn514.mat')
 
 simulations = f['simulations']
 
 #We define anonymous functions that will be usefull
-w = lambda i : WhittleS(simulations,i)
-d = lambda i : DFAS(simulations,i)
+w = lambda i : whittle_s(simulations,i)
+d = lambda i : dfa_s(simulations,i)
 
 #dfai = np.zeros(simulations.shape[0])
 whittlei = np.zeros(simulations.shape[0])

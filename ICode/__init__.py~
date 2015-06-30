@@ -2,7 +2,7 @@ import data_class
 import estimators
 import extractsignals
 import opas
-import progressbar
+import progressBar
 import saver
 import loader
 __version__ = "0.0.1"
