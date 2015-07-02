@@ -14,7 +14,8 @@ from ICode.progressbar import ProgressBar
 from ICode.loader import load_dynacomp
 from ICode.estimators.penalyzed import jhm, gradjhm, jhmbis, gradjhmbis
 
-from scipy.optimize import fmin_l_bfgs_b  #, check_grad
+from scipy.optimize import fmin_l_bfgs_b
+#from scipy.optimize import  check_grad
 ##loading data
 dataset2 = load_dynacomp(preprocessing_folder='pipeline_1', prefix='swr')
 
@@ -37,14 +38,13 @@ del dico
 estimate = np.zeros(N)
 aest = np.zeros(N)
 for j in np.arange(0, N):
-  sortie = regrespond_det2(Elog[j], Varlog[j], 2, nj, j1, j2, wtype)
-  estimate[j]=sortie['Zeta'] / 2. #normalement Zeta
-  aest[j]  = sortie['aest']
-  Bar.update(j)
+    sortie = regrespond_det2(Elog[j], Varlog[j], 2, nj, j1, j2, wtype)
+    estimate[j] = sortie['Zeta'] / 2.
+    aest[j] = sortie['aest']
+    Bar.update(j)
 
 del sortie
 ## ## ## ## ##
-
 
 #we create the image with the appropriate function
 img8 = masker.inverse_transform(estimate)

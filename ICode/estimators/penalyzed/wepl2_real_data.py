@@ -1,151 +1,202 @@
 import ICode.Optimize as o
 import numpy as np
-def fmrd(H,aest,yij,varyj,nj, j1,j2,mask, wtype=1):
-  shape = mask.shape
-  j2 = min((j2,nj.shape[0]))
-  j1j2 = np.arange(j1-1,j2)  #on commence par la partie en f(H)
-  J = len(j1j2)
-  njj=nj[j1j2]
-  Hm = np.reshape(H,shape)[mask]
-  aestm = np.reshape(aest,shape)[mask] 
-  djh = 2*np.outer(Hm,j1j2+1) + np.outer(aestm,np.ones(len(j1j2))) 
-  S = (yij[:,j1j2] - djh)**2
-  N= sum(njj)
-  if     wtype==0:#  % uniform weights
-    wvarjj = nancynp.ones(J)   
-    wstr = 'Uniform'
-  elif wtype==1:#  % Gaussian type weights
-    wvarjj = njj/N        
-    wstr = 'Gaussian'
-  elif  wtype==2:#   % weights from data 
-    wvarjj = 1/varyjj
-    wstr = 'Estimated'
-  else :#% all other cases
-    print '** Weight option not recognised, using uniform weights\n'
-    wvarjj = np.ones(1,J) 
-    wstr = 'Uniform'
-  
-  S  = S.dot(wvarjj)
-  return S
+from ICode.optimize.objective_functions import _unmask
 
-def Gradfmrd(H,aest,yij,varyj,nj, j1,j2,mask, wtype=1):
-  shape = mask.shape
-  j2 = min((j2,nj.shape[0]))
-  j1j2 = np.arange(j1-1,j2)
-  J = len(j1j2)
-  njj=nj[j1j2]
- 
-  #djh pour 2jH
-  Hm = np.reshape(H,shape)[mask]
-  aestm = np.reshape(aest,shape)[mask] 
-  djh = 2*np.outer(Hm,j1j2+1) + np.outer(aestm,np.ones(len(j1j2))) 
-  
-  if     wtype==0:#  % uniform weights
-    wvarjj = nancynp.ones(J)   
-    wstr = 'Uniform'
-  elif wtype==1:#  % Gaussian type weights
-    wvarjj = njj/ sum(njj)       
-    wstr = 'Gaussian'
-  elif  wtype==2:#   % weights from data 
-    wvarjj = 1/varyjj
-    wstr = 'Estimated'
-  else :#% all other cases
-    print '** Weight option not recognised, using uniform weights\n'
-    wvarjj = np.ones(1,J) 
-    wstr = 'Uniform'
-  S = np.zeros(shape)
-  S[mask] = -4*(yij[:,j1j2]-djh).dot((j1j2+1)*wvarjj)
-  return S
-
-def fmrdbis(Haest,yij,varyj,nj, j1,j2,mask, wtype=1, pfunc =None):
-  shape = mask.shape 
-  j2 = min((j2,nj.shape[0]))
-  jj = np.arange(j1-1,j2)  #on commence par la partie en f(H)
-  J = len(jj)
-  njj=nj[jj]
-  n = len(Haest)/2
-  H = Haest[:n]
-  aest = Haest[n:]
-  Hm = np.reshape(H,shape)[mask]
-  aest = np.reshape(aest,shape)[mask] 
-  djh = 2*np.outer(Hm,jj+1) + np.outer(aest,np.ones(len(jj))) 
-  S = (yij[:,jj] - djh)**2
-  N= sum(njj)
-  if     wtype==0:#  % uniform weights
-    wvarjj = nancynp.ones(J)   
-    wstr = 'Uniform'
-  elif wtype==1:#  % Gaussian type weights
-    wvarjj = njj/N        
-    wstr = 'Gaussian'
-  elif  wtype==2:#   % weights from data 
-    wvarjj = 1/varyjj
-    wstr = 'Estimated'
-  else :#% all other cases
-    print '** Weight option not recognised, using uniform weights\n'
-    wvarjj = np.ones(1,J) 
-    wstr = 'Uniform'
-  
-  #then we multiply S by the pounderation
-  S = S.dot(wvarjj)
-  return sum(S)+pfunc(H)
-  
-def Gradfmrdbis(Haest,yij,varyj,nj, j1,j2,mask, wtype=1,Gpfunc=None):
-  shape = mask.shape
-  j2 = min((j2,nj.shape[0]))
-  jj = np.arange(j1-1,j2)
-  J = len(jj)
-  njj=nj[jj]
-  N=sum(njj)
-  n = len(Haest)/2
-  H = Haest[:n]
-  aest = Haest[n:]
-  Gaest = np.zeros(n)
-  GH = np.zeros(n)
-  mmask = np.reshape(mask,n)
-  Hm = np.reshape(H,shape)[mask]
-  aest = np.reshape(aest,shape)[mask]
-  #djh pour 2jH
-  djh = 2*np.outer(Hm,jj+1) + np.outer(aest,np.ones(len(jj)))
-
-  if     wtype==0:#  % uniform weights
-    wvarjj = nancynp.ones(J)   
-    wstr = 'Uniform'
-  elif wtype==1:#  % Gaussian type weights
-    wvarjj = njj/N        
-    wstr = 'Gaussian'
-  elif  wtype==2:#   % weights from data 
-    wvarjj = 1/varyjj
-    wstr = 'Estimated'
-  else :#% all other cases
-    print '** Weight option not recognised, using uniform weights\n'
-    wvarjj = np.ones(1,J) 
-    wstr = 'Uniform'
-  #on calcule la parti du gradiant en aest
-  G = -2*(yij[:,jj] - djh)
-  #Gaest = 0.5*(G.dot(wvarjj) + G.dot(np.ones(len(jj))))
-  #Gaest = G.dot(np.ones(len(jj)))
-  Gaest[mmask] = G.dot(wvarjj)
-  #on peut reutiliser Gaest pour le calcul pour S
-  S = 2*G.dot(jj*wvarjj)
-  GH[mmask] = S
-  if not (Gpfunc is None ): 
-    GH += Gpfunc(H)
-  #return np.reshape((S + 2*l*H),(1,len(H))) au cas ou on veuille regarder le chack_gradient terme a terme
-  return np.concatenate((GH,Gaest))
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## #
+## Same function but allow to use a mask !
+## The H and aest should have the same shape
+## the whole figure (masked part + unmasked part)
+## But yij, varyij and nj should have a shape compatible
+## with the masked part (the part where mask is true !)
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## #
 
 
+def _fmask(H, aest, yij, varyj, nj, j1, j2, mask, wtype=1):
+    """Same function but allow to use a mask !
+    The H and aest should have the same shape
+    the whole figure (masked part + unmasked part)
+    But yij, varyij and nj should have a shape compatible
+    with the masked part (the part where mask is true !)
+    """
 
-## This are the functions that should be tested on the real datas 
-def JHmrd(H,aest,shape,yij,varyj,nj, j1,j2,mask,l=1, wtype=1):
-  return fmrd(H,aest,yij,varyj,nj, j1,j2,mask, wtype)+l*np.sum((np.array(o.hgradmask(np.reshape(H,shape),mask))**2))
+    j2 = np.min((j2, len(nj)))
+    j1j2 = np.arange(j1 - 1, j2)
+    njj = nj[j1j2]
+    djh = 2 * np.outer(H, j1j2) + np.outer(aest, np.ones(len(j1j2)))
+    S = (yij[:, j1j2] - djh) ** 2
+    N = np.sum(njj)
+    #  uniform weights
+    if  wtype == 0:
+        wvarjj = np.ones(len(j1j2))
+        #wstr = 'Uniform'
+    # Gaussian type weights
+    elif wtype == 1:
+        wvarjj = njj / N
+        #wstr = 'Gaussian'
+    #   % weights from data
+    elif  wtype == 2:
+        wvarjj = 1 / varyj
+        #wstr = 'Estimated'
+    #% all other cases
+    else:
+        print '** Weight option not recognised, using uniform weights\n'
+        wvarjj = np.ones(1, len(j1j2))
+        #wstr = 'Uniform'
+
+    #then we multiply S by the pounderation
+    S = S.dot(wvarjj)
+
+    return np.sum(S)
 
 
-def GradJHmrd(H,aest,shape,yij,varyj,nj, j1,j2,mask,epsilon =1,l=1, wtype=1):
-  return np.reshape(Gradfmrd(H,aest,yij,varyj,nj, j1,j2,mask, wtype),H.shape) + np.reshape(l*o.hflapdmask(np.reshape(H,shape),mask,epsilon = epsilon),H.shape)
+def _gradfmask(H, aest, yij, varyj, nj, j1, j2, mask, wtype=1):
+    """This function is the gradient of the preceding function f
+    """
+
+    l = H.shape[0]
+    S = np.zeros(l)
+    j2 = np.min((j2, len(nj)))
+    j1j2 = np.arange(j1 - 1, j2)
+    njj = nj[j1j2]
+    N = sum(njj)
+    #djh pour 2jH
+    djh = 2 * np.outer(H, j1j2) + np.outer(aest, np.ones(len(j1j2)))
+
+    #  uniform weights
+    if     wtype == 0:
+        wvarjj = np.ones(len(j1j2))
+        #"wstr = 'Uniform'
+    #  % Gaussian type weights
+    elif wtype == 1:
+        wvarjj = njj / N
+        #wstr = 'Gaussian'
+    # weights from data
+    elif  wtype == 2:
+        wvarjj = 1 / varyj
+        #wstr = 'Estimated'
+    # all other cases
+    else:
+        print '** Weight option not recognised, using uniform weights\n'
+        wvarjj = np.ones(1, len(j1j2))
+        #wstr = 'Uniform'
+
+    S[np.reshape(mask, l)] = - 4 * (yij[:, j1j2] - djh).dot(j1j2 * wvarjj)
+    return S
 
 
-def JHmbis(Haest,shape,yij,varyj,nj, j1,j2,mask,l=1, wtype=1):
-  return fmrdbis(Haest,yij,varyj,nj, j1,j2,mask, wtype, pfunc =lambda x : l*np.sum((np.array(o.hgradmask(np.reshape(x,shape),mask))**2)))
+def _fmaskbis(Haest, yij, varyj, nj, j1, j2, mask, wtype=1, pfunc=None):
+    """Same function but allow to use a mask !
+    The H and aest should have the same shape
+    the whole figure (masked part + unmasked part)
+    But yij, varyij and nj should have a shape compatible
+    with the masked part (the part where mask is true !)
+    """
+    #the f(H) part
+    j2 = np.min((j2, len(nj)))
+    j1j2 = np.arange(j1 - 1, j2)
+    njj = nj[j1j2]
+    n = len(Haest) / 2
+    H = Haest[:n]
+    aest = Haest[n:]
+    djh = 2 * np.outer(Hm, j1j2) + np.outer(aest, np.ones(len(j1j2)))
+    S = (yij[:, j1j2] - djh) ** 2
+    N = sum(njj)
 
-def GradJHmbis(Haest,shape,yij,varyj,nj, j1,j2,mask,epsilon = 0,l=0, wtype=1):
-  return Gradfmrdbis(Haest,yij,varyj,nj, j1,j2,mask, wtype, Gpfunc = lambda x : l*np.reshape(o.hflapdmask(np.reshape(x,shape),mask,epsilon = 0),x.shape))
+    #  uniform weights
+    if     wtype == 0:
+        wvarjj = np.ones(len(j1j2))
+        #wstr = 'Uniform'
+    #   Gaussian type weights
+    elif wtype == 1:
+        wvarjj = njj / N
+        #wstr = 'Gaussian'
+    #   weights from data
+    elif  wtype == 2:
+        wvarjj = 1 / varyj
+        #wstr = 'Estimated'
+    # all other cases
+    else:
+        print '** Weight option not recognised, using uniform weights\n'
+        wvarjj = np.ones(1, len(j1j2))
+        #wstr = 'Uniform'
+
+    #then we multiply S by the pounderation
+    S = S.dot(wvarjj)
+    if pfunc is None:
+        return np.sum(S)
+    return np.sum(S) + pfunc(H)
+
+
+def _gradfmaskbis(Haest, yij, varyj, nj, j1, j2, mask, wtype=1, Gpfunc=None):
+    """Gradient of the preceding function
+    """
+    shape = mask.shape
+    j2 = np.min((j2, len(nj)))
+    j1j2 = np.arange(j1 - 1, j2)
+    njj = nj[j1j2]
+    N = sum(njj)
+    n = len(Haest) / 2
+    H = Haest[:n]
+    aest = Haest[n:]
+    Gaest = np.zeros(n)
+    GH = np.zeros(n)
+    mmask = np.reshape(mask, n)
+    Hm = np.reshape(H, shape)[mask]
+    aest = np.reshape(aest, shape)[mask]
+    #djh for 2jH
+    djh = 2 * np.outer(Hm, j1j2) + np.outer(aest, np.ones(len(j1j2)))
+
+    #  uniform weights
+    if wtype == 0:
+        wvarjj = np.ones(len(j1j2))
+        #wstr = 'Uniform'
+    #  Gaussian type weights
+    elif wtype == 1:
+        wvarjj = njj / N
+        #wstr = 'Gaussian'
+    #    weights from data
+    elif  wtype == 2:
+        wvarjj = 1 / varyj
+        #wstr = 'Estimated'
+    # all other cases
+    else:
+        print '** Weight option not recognised, using uniform weights\n'
+        wvarjj = np.ones(1, len(j1j2))
+        #wstr = 'Uniform'
+
+    G = - 2 * (yij[:, j1j2] - djh)
+    Gaest[mmask] = G.dot(wvarjj)
+
+    S = 2 * G.dot(j1j2 * wvarjj)
+    GH[mmask] = S
+    if not (Gpfunc is None):
+        GH += Gpfunc(H)
+    #return np.reshape((S + 2*l*H),(1,len(H)))
+    return np.concatenate((GH, Gaest))
+
+
+def jhem(H, aest, yij, varyj, nj, j1, j2, mask, l=1, wtype=1):
+    return fmask(H, aest, yij, varyj, nj, j1, j2, mask, wtype) + l * np.sum(
+           o.gradient(np.reshape(H,mask.shape)) ** 2)
+
+
+def gradjhem(H, aest, yij, varyj, nj, j1, j2, mask, l=1, wtype=1):
+    return gradfmask(H, aest, yij, varyj, nj, j1, j2, mask,
+            wtype) - 2 * l * np.reshape(
+           o.div(o.gradient(np.reshape(H,mask.shape))), H.shape)
+
+
+def jhembis(Haest, yij, varyj, nj, j1, j2, mask, l=1, wtype=1):
+    """
+    Haest is the concatenation of H and aest,
+    shape is the shape of the original image
+    """
+    return fmaskbis(Haest, yij, varyj, nj, j1, j2, mask, wtype,
+              pfunc=lambda x: l * np.sum(
+              o.gradient(np.reshape(x,mask.shape)) ** 2))
+
+
+def gradjhembis(Haest, yij, varyj, nj, j1, j2, mask, l=0, wtype=1):
+    return gradfmaskbis(Haest, yij, varyj, nj, j1, j2, mask, wtype,
+                  Gpfunc=lambda x: - 2 * l * np.reshape(
+                  o.div(o.gradient(np.reshape(x,mask.shape))), x.shape))

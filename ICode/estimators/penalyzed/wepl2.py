@@ -2,6 +2,7 @@
 import numpy as np
 from scipy.ndimage.filters import laplace
 import ICode.optimize as o
+from ICode.optimize.objective_functions import _unmask
 """
 this functions are objective functions of type
 J = sum(f(Hi)) + lambda x penalyzation(H)
@@ -569,3 +570,61 @@ def gradjhmbis(Haest, shape, yij, varyj, nj, j1, j2, mask, epsilon=0, l=0,
                      Gpfunc=lambda x: l * np.reshape(
                      o.hflapdmask(np.reshape(x, shape),
                      mask, epsilon=epsilon), x.shape))
+
+
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
+#This are the same function implemented with elvis gradient and laplacian
+def jhe(H, aest, shape, yij, varyj, nj, j1, j2, l=1, wtype=1):
+    return f(H, aest, yij, varyj, nj, j1, j2, wtype) + l * np.sum(
+           o.gradient(np.reshape(H,shape)) ** 2)
+
+
+def gradjhe(H, aest, shape, yij, varyj, nj, j1, j2, l=1, wtype=1):
+    return gradf(H, aest, yij, varyj, nj, j1, j2, wtype) - 2 * l * np.reshape(
+           o.div(o.gradient(np.reshape(H, shape))), H.shape)
+
+
+def jhebis(Haest, shape, yij, varyj, nj, j1, j2, l=1, wtype=1):
+    """
+    Haest is the concatenation of H and aest,
+    shape is the shape of the original image
+    """
+    return fbis(Haest, yij, varyj, nj, j1, j2, wtype,
+              pfunc=lambda x: l * np.sum(
+              o.gradient(np.reshape(x, shape)) ** 2))
+
+
+def gradjhebis(Haest, shape, yij, varyj, nj, j1, j2, l=0, wtype=1):
+    return gradfbis(Haest, yij, varyj, nj, j1, j2, wtype,
+                  Gpfunc=lambda x: - 2 * l * np.reshape(
+                  o.div(o.gradient(np.reshape(x, shape))), x.shape))
+
+##Same but these function are able to deal with a mask
+##Usefull in my case with real datas !
+def jhem(H, aest, yij, varyj, nj, j1, j2, mask, l=1, wtype=1):
+    return f(H, aest, yij, varyj, nj, j1, j2, wtype) + l * np.sum(
+           o.gradient(_unmask(H,mask)) ** 2)
+
+
+def gradjhem(H, aest, yij, varyj, nj, j1, j2, mask, l=1, wtype=1):
+    return gradf(H, aest, yij, varyj, nj, j1, j2,
+            wtype) - 2 * l * o.div(o.gradient(_unmask(H,mask)))[mask]
+
+
+def jhembis(Haest, yij, varyj, nj, j1, j2, mask, l=1, wtype=1):
+    """
+    Haest is the concatenation of H and aest,
+    shape is the shape of the original image
+    """
+    return fbis(Haest, yij, varyj, nj, j1, j2, wtype,
+              pfunc=lambda x: l * np.sum(
+              o.gradient(_unmask(x,mask)) ** 2))
+
+
+def gradjhembis(Haest, yij, varyj, nj, j1, j2, mask, l=0, wtype=1):
+    return gradfbis(Haest, yij, varyj, nj, j1, j2, wtype,
+           Gpfunc=lambda x: - 2 * l * o.div(o.gradient(_unmask(x,mask)))[mask])
+ 

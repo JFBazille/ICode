@@ -1,6 +1,7 @@
 import numpy as np
 import scipy.io as scio
 from math import ceil
+import pyhrf
 def get_simulation_from_picture(picture = None, lsimul= 4096):
   f = scio.loadmat('ICode/simulations/simulationsfGn2.mat')
   simulations = f['simulations']
@@ -42,6 +43,7 @@ def add_parterns(simulation,*functions,**kwargs):
   for fnc in functions : 
     retour = retour + func(s,retour.shape[-1])
   return np.reshape(retour, simulation.shape)
+
 
 def square(l=10):
   square = 0.5*np.ones((2*l,2*l))

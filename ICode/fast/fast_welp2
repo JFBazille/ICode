@@ -88,7 +88,7 @@ if choice %2 ==1:
   for idx in r:
     monmin = fmin(lbda[idx])
     #cg[idx] = ckgrad(lbda[idx])
-    img = masker.inverse_transform(monmin[0][mask]
+    img = masker.inverse_transform(monmin[0][mask])
     p=plot_stat_map(img)
     p.title('Lambda = %.3f' % lbda[idx])
     minimiseurs.append(img) 
