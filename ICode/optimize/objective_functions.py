@@ -257,11 +257,6 @@ def logistic_loss_grad(X, y, w):
     return grad
 
 
-# gradient of squared loss function
-squared_loss_grad = partial(squared_loss, compute_energy=False,
-                            compute_grad=True)
-
-
 def gradient(w):
     """Pure spatial gradient"""
     return gradient_id(w, l1_ratio=0.)[:-1]  # pure nabla

@@ -18,7 +18,7 @@ l = 514
 title = '  '
 #s = opas.square2(10)
 s = opas.smiley()
-mask = s > 0.3
+mask = s > 0.1
 
 signal = opas.get_simulation_from_picture(s, lsimul=l)
 signalshape = signal.shape
@@ -286,11 +286,11 @@ if choice == 25:
     #In that configuration, datas out of the mask are not available
     Elog2 = np.reshape(Elog, shape + (Elog.shape[- 1],))[mask]
     Varlog2 = np.reshape(Varlog, shape + (Varlog.shape[- 1],))[mask]
-    f = lambda x, lbda: penalyzed.jhem(x, aest, Elog2, Varlog2,
+    f = lambda x, lbda: penalyzed.jhem(x, aest[mask.ravel()], Elog2, Varlog2,
                                       nj, j1, j2, mask, l=lbda)
-    g = lambda x, lbda: penalyzed.gradjhem(x, aest, Elog2, Varlog2,
+    g = lambda x, lbda: penalyzed.gradjhem(x, aest[mask.ravel()], Elog2, Varlog2,
                                           nj, j1, j2, mask, l=lbda)
-    H = estimate
+    H = estimate[mask.ravel()]
     title = 'JHem_GradJHem'
 
 if choice == 26:
@@ -303,7 +303,7 @@ if choice == 26:
     g = lambda x, lbda: penalyzed.gradjhembis(x,
                                               Elog2, Varlog2,
                                           nj, j1, j2, mask, l=lbda)
-    H = np.concatenate((estimate, aest))
+    H = np.concatenate((estimate[mask.ravel()], aest[mask.ravel()]))
     title = 'JHembis_GradJHembis'
 
 ##if not 'bis'
@@ -329,7 +329,10 @@ if choice % 2 == 1:
     for idx in r:
         monmin = fmin(lbda[idx])
         cg[idx] = ckgrad(lbda[idx])
-        minimiseurs[idx] = np.reshape(monmin[0], s.shape)
+        if 'JHem' in title:
+            minimiseurs[idx] = _unmask(monmin[0], mask)
+        else:
+            minimiseurs[idx] = _unmask(monmin[0], mask)
         rmse[idx] = np.sqrt(np.mean((minimiseurs[idx] - s) ** 2))
 
 else:
@@ -359,7 +362,7 @@ fig.colorbar(im, cax=cax)
 cax2 = fig2.add_axes([0.91, 0.1, 0.028, 0.8])
 fig2.colorbar(im2, cax=cax2)
 
-#fig.savefig('/volatile/hubert/beDamer/presentation_juin_2015/' + title + '_graph.pdf')
+fig.savefig('/volatile/hubert/beamer/presentation_juin_2015/' + title + '_graph.pdf')
 
 fig3, ax1 = plt.subplots()
 ax1.plot(lbda, cg)
@@ -375,6 +378,7 @@ ax2.set_ylabel('rmse', color='r')
 for tl in ax2.get_yticklabels():
     tl.set_color('r')
     #set the left graduation color in blue
+
 
 fig3.savefig('/volatile/hubert/beamer/presentation_juin_2015/' + title + '_rmse.pdf')
 print title

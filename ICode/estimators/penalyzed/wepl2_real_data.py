@@ -98,7 +98,7 @@ def _fmaskbis(Haest, yij, varyj, nj, j1, j2, mask, wtype=1, pfunc=None):
     n = len(Haest) / 2
     H = Haest[:n]
     aest = Haest[n:]
-    djh = 2 * np.outer(Hm, j1j2) + np.outer(aest, np.ones(len(j1j2)))
+    djh = 2 * np.outer(H, j1j2) + np.outer(aest, np.ones(len(j1j2)))
     S = (yij[:, j1j2] - djh) ** 2
     N = sum(njj)
 
@@ -140,11 +140,9 @@ def _gradfmaskbis(Haest, yij, varyj, nj, j1, j2, mask, wtype=1, Gpfunc=None):
     aest = Haest[n:]
     Gaest = np.zeros(n)
     GH = np.zeros(n)
-    mmask = np.reshape(mask, n)
-    Hm = np.reshape(H, shape)[mask]
-    aest = np.reshape(aest, shape)[mask]
+
     #djh for 2jH
-    djh = 2 * np.outer(Hm, j1j2) + np.outer(aest, np.ones(len(j1j2)))
+    djh = 2 * np.outer(H, j1j2) + np.outer(aest, np.ones(len(j1j2)))
 
     #  uniform weights
     if wtype == 0:
@@ -165,10 +163,10 @@ def _gradfmaskbis(Haest, yij, varyj, nj, j1, j2, mask, wtype=1, Gpfunc=None):
         #wstr = 'Uniform'
 
     G = - 2 * (yij[:, j1j2] - djh)
-    Gaest[mmask] = G.dot(wvarjj)
+    Gaest = G.dot(wvarjj)
 
     S = 2 * G.dot(j1j2 * wvarjj)
-    GH[mmask] = S
+    GH = S
     if not (Gpfunc is None):
         GH += Gpfunc(H)
     #return np.reshape((S + 2*l*H),(1,len(H)))

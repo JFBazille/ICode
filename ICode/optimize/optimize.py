@@ -1,4 +1,15 @@
 import numpy as np
+from ICode.optimize.objective_functions import gradient
+
+
+def tv(img):
+    """This function compute the total variation of an image
+    """
+    spatial_grad = gradient(img)
+    return np.sum(np.sqrt(np.sum(spatial_grad[:-1] * spatial_grad[:-1],
+                                    axis=0)))
+    
+
 def hgrad(H,renorm=1.):
   e = 0.5 /renorm
   shp= H.shape

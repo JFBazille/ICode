@@ -14,7 +14,7 @@ def hurstexp_welchper(data, samp=0.2, f_max=0.1):
     Welch periodogram
     data : your signal
     samp : sampling rate in Hz 0.2 for an fMRI series
-    f_max: the higher frequence you want to take into account
+    f_max: the higher frequency you want to take into account
     """
     #data could be two dimensional(but no more...) in that cas time should
     #be on second position
@@ -34,7 +34,7 @@ def hurstexp_welchper_2(d, samp=0.2, f_max=0.1):
     Welch periodogram
     data : your signal
     samp : sampling rate in Hz 0.2 for an fMRI series
-    f_max: the higher frequence you want to take into account
+    f_max: the higher frequency you want to take into account
     I have change a little bit the computation of H (see below retour)
     """
     #data could be two dimensional(but no more...) in that cas time should

@@ -12,7 +12,7 @@ from ICode.extractsignals.extract import extract_one_vpv_signal
 from ICode.estimators.wavelet import *
 from ICode.progressbar import ProgressBar
 from ICode.loader import load_dynacomp
-from ICode.estimators.penalyzed import jhem, gradjhem, jhembis, gradjhembis
+from ICode.estimators.penalyzed import mtvsolver, mtvsolverbis
 
 from scipy.optimize import fmin_l_bfgs_b
 #from scipy.optimize import  check_grad
@@ -58,33 +58,25 @@ H = img8.get_data()[mask]
 img9 = masker.inverse_transform(aest)
 aest = img9.get_data()[mask]
 
+if choice == 1:
+    l1_ratio = 0
+    f = lambda lbda: mtvsolver(H, aest,
+                                        Elog, Varlog,
+                                        nj, j1, j2,mask,
+                                        lipschitz_constant=0,
+                                        l1_ratio = l1_ratio, l=lbda)
+    title = 'wetvp'
 
-choice = 21
 
-if choice == 20:
-    f = lambda x, lbda: jhembis(x, shape,
-    Elog, Varlog, nj, j1, j2, mask, l=lbda)
-    g = lambda x, lbda: gradjhembis(x, shape, Elog, Varlog,
-                                             nj, j1, j2, mask, epsilon=0,
-                                             l=lbda)
-    H = np.concatenate((H, aest))
-    title = 'JHemaskbis GradJhedmaskbis'
-
-if choice == 21:
-    f = lambda x, lbda: jhem(x, aest,
-                          Elog, Varlog, nj, j1, j2, mask, l=lbda)
-    #We set epsilon to 0
-    g = lambda x, lbda: gradjhem(x, aest, Elog, Varlog, nj, j1, j2, mask,
-                               l=lbda)
-
-    title = 'JHem GradJHem'
-
-fg = lambda x, lbda, **kwargs: (f(x, lbda), g(x, lbda))
-#For each lambda we use blgs algorithm to find the minimum
-# We start from the
-fmin = lambda lbda: fmin_l_bfgs_b(lambda x: fg(x, lbda), H)
-ckgrad = lambda lbda: check_grad(lambda x: f(x, lbda), lambda x: g(x, lbda), H)
-                                                               #, epsilon = )
+if choice == 2:
+    l1_ratio = 0
+    f = lambda lbda: mtvsolverbis(np.concatenate((estimate,
+                                                            aest)),
+                                        Elog, Varlog,
+                                        nj, j1, j2,mask, max_iter = 100,
+                                        l1_ratio = l1_ratio,
+                                        lipschitz_constant=0, l=lbda)
+    title = 'wetvp_bis'
 
 lmax = 15
 #minimiseurs = list()
@@ -95,20 +87,18 @@ lbda = np.array((0,) + tuple(1.5 ** r[:-1]))
 
 if choice % 2 == 1:
     for idx in r:
-        monmin = fmin(lbda[idx])
-        #cg[idx] = ckgrad(lbda[idx])
+        monmin = f(lbda[idx])
         img = masker.inverse_transform(monmin[0])
-        output_file = ('/volatile/hubert/beamer/brain_' + title + '%.1f_graph2.pdf' %(lbda[idx],))
+        output_file = ('/volatile/hubert/beamer/brain_' + title + '%.1f_graph.pdf' %(lbda[idx],))
+
         p = plot_stat_map(img, output_file=output_file)
         #p.title('Lambda = %.3f' % lbda[idx])
         #minimiseurs.append(img)
 else:
     for idx in r:
-        monmin = fmin(lbda[idx])
-        #cg[idx] = ckgrad(lbda[idx])
+        monmin = f(lbda[idx])
         img = masker.inverse_transform(
                 monmin[0][:monmin[0].shape[0] / 2])
-        output_file = ('/volatile/hubert/beamer/brain_' + title + '%.1f_graph2.pdf' %(lbda[idx],))
         p = plot_stat_map(img, output_file=output_file)
         #p.title('Lambda = %.3f' % lbda[idx])
         #minimiseurs.append(img)
