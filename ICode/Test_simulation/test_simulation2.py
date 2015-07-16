@@ -4,11 +4,11 @@ sys.path.append('/volatile/hubert/HCode')
 import scipy.io as scio
 import numpy as np
 import matplotlib.pyplot as plt
-from Estimators.DFA import DFAS, DFANormS
-from Estimators.Whittle import WhittleS, WhittleNormS
-from Estimators.Welch import WelchS, WelchNormS
-from Estimators.welchnitime import WelchNitimeS, WelchNitimeNormS
-from Estimators.Welchp import WelchpS
+from ICode.estimators.dfa import dfa_s, dfa_norm_s
+from ICode.estimators.whittle import whittle_s, whittle_norm_s
+from ICode.estimators.welchml import welch_ml_s, welch_ml_norm_s
+from ICode.estimators.welchnitimeml import welch_nitime_ml_s, welch_nitime_ml_norm_s
+from ICode.estimators.welchp import welchps
 import ProgressBar
 import pickle
 import math
