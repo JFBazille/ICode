@@ -4,12 +4,12 @@ sys.path.append('/volatile/hubert/HCode')
 import scipy.io as scio
 import numpy as np
 import matplotlib.pyplot as plt
-from Estimators.DFA import DFAS, DFANormS
-from Estimators.Whittle import WhittleS, WhittleNormS
-from Estimators.Welch import WelchS, WelchNormS
-from Estimators.welchnitime import WelchNitimeS, WelchNitimeNormS
-from Estimators.Welchp import WelchpS
-import ProgressBar
+from ICode.estimators.dfa import dfa_s, dfa_norm_s
+from ICode.estimators.whittle import whittle_s, whittle_norm_s
+from ICode.estimators.welchml import welch_ml_s, welch_ml_norm_s
+from ICode.estimators.welchnitimeml import welch_nitime_ml_s, welch_nitime_ml_norm_s
+from ICode.estimators.welchp import welchps
+import ICode.progressbar
 import pickle
 import math
 
@@ -49,7 +49,7 @@ def test_simulation(fichier = '/volatile/hubert/datas/simulations/simulationsfBn
     
     
     if progressbar:
-      progressBar = ProgressBar.ProgressBar(N,30,'Work '+str(i)+' in progress')
+      progressBar = progressbar.ProgressBar(N,30,'Work '+str(i)+' in progress')
       for j in range(N):
 	progressBar.update(j)
 	#we compute the return value
@@ -138,7 +138,7 @@ def test_simulation_norm(fichier = '/volatile/hubert/datas/simulations/simulatio
     
     
     if progressbar:
-      progressBar = ProgressBar.ProgressBar(N,30,'Work in progress')
+      progressBar = progressbar.ProgressBar(N,30,'Work in progress')
       for j in range(N):
 	progressBar.update(j)
 	#we compute the return value
@@ -167,7 +167,7 @@ def test_simulation_norm(fichier = '/volatile/hubert/datas/simulations/simulatio
   f, myplots = plt.subplots(1,4,sharey=True)
   for cle,valeur in donnees.items():
     bp = myplots[j].boxplot(valeur.T, labels=np.arange(1,10)/10.)
-    myplots[j].set_title('Estimation of Hurst\ncoeffician by\n'+cle+'method')
+    myplots[j].set_title('Estimation of Hurst\ncoefficient by\n'+cle+'method')
     
     for line in bp['medians']:
       # get position data for median line
@@ -193,4 +193,7 @@ def test_simulation_norm(fichier = '/volatile/hubert/datas/simulations/simulatio
 
 if __name__ == "__main__":
   print 'function loaded'
-  #test_simulation(titre = "fGn of lenght 4096")
+
+#test_simulation(fichier="fbm08n4096.mat", titre = "fGn of lenght 4096")
+#test_simulation(fichier='/volatile/hubert/datas/fbm08n4096.mat')
+test_simulation()
