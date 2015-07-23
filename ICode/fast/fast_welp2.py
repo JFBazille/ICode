@@ -7,7 +7,6 @@ from nilearn.plotting import plot_stat_map
 import numpy as np
 from nilearn.input_data import NiftiMapsMasker
 from nilearn.input_data import NiftiMasker
-
 from ICode.extractsignals.extract import extract_one_vpv_signal
 from ICode.estimators.wavelet import *
 from ICode.progressbar import ProgressBar
@@ -17,7 +16,7 @@ from ICode.estimators.penalyzed import jhem, gradjhem, jhembis, gradjhembis
 from scipy.optimize import fmin_l_bfgs_b
 #from scipy.optimize import  check_grad
 ##loading data
-dataset2 = load_dynacomp(preprocessing_folder='pipeline_1', prefix='swr')
+dataset2 = load_dynacomp(preprocessing_folder='pipeline_1', prefix='wr')
 
 print 'chargement des donnees'
 
@@ -98,7 +97,7 @@ if choice % 2 == 1:
         monmin = fmin(lbda[idx])
         #cg[idx] = ckgrad(lbda[idx])
         img = masker.inverse_transform(monmin[0])
-        output_file = ('/volatile/hubert/beamer/brain_' + title + '%.1f_graph2.pdf' %(lbda[idx],))
+        output_file = ('/volatile/hubert/beamer/brain_' + title + '%.1f_nonsmoothed.pdf' %(lbda[idx],))
         p = plot_stat_map(img, output_file=output_file)
         #p.title('Lambda = %.3f' % lbda[idx])
         #minimiseurs.append(img)
@@ -108,7 +107,7 @@ else:
         #cg[idx] = ckgrad(lbda[idx])
         img = masker.inverse_transform(
                 monmin[0][:monmin[0].shape[0] / 2])
-        output_file = ('/volatile/hubert/beamer/brain_' + title + '%.1f_graph2.pdf' %(lbda[idx],))
+        output_file = ('/volatile/hubert/beamer/brain_' + title + '%.1f_nonsmoothed.pdf' %(lbda[idx],))
         p = plot_stat_map(img, output_file=output_file)
         #p.title('Lambda = %.3f' % lbda[idx])
         #minimiseurs.append(img)

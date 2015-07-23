@@ -2,8 +2,12 @@ import numpy as np
 import scipy.io as scio
 from math import ceil
 import pyhrf
+def get_simulation(fichier =  '/volatile/hubert/ICode/ICode/opas/simulationsfGn2.mat'):
+    f =  scio.loadmat(fichier)
+    return f['simulations']
+
 def get_simulation_from_picture(picture = None, lsimul= 4096):
-  f = scio.loadmat('ICode/simulations/simulationsfGn2.mat')
+  f = scio.loadmat('./ICode/opas/simulationsfGn2.mat')
   simulations = f['simulations']
   n = simulations.shape[1]
   if(picture is None):

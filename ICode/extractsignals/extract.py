@@ -1,5 +1,9 @@
-import time
+import os, time
+import numpy as np
+from ICode.loader import load_dynacomp, dict_to_list
+from nilearn.input_data import NiftiMapsMasker
 from nilearn.input_data import NiftiMasker
+
 ##This variable is should contain the path to your Nifti data you want to load
 PATH_TO_SAVE_DATA = '/volatile/hubert/datas/rois_filter'
 def extract_rois_signals(preprocessing_folder ='pipeline_2', prefix= 'resampled_wr'):

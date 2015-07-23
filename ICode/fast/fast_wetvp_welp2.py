@@ -7,7 +7,7 @@ from nilearn.plotting import plot_stat_map
 import numpy as np
 from nilearn.input_data import NiftiMapsMasker
 from nilearn.input_data import NiftiMasker
-
+from ICode.estimators.penalyzed import jhem, gradjhem
 from ICode.extractsignals.extract import extract_one_vpv_signal
 from ICode.estimators.wavelet import *
 from ICode.progressbar import ProgressBar
@@ -27,7 +27,7 @@ x = x.T
 N = x.shape[0]
 Bar = ProgressBar(N, 60, 'Work in progress')
 j1 = 2
-j2 = 7
+j2 = 6
 wtype = 1
 ##un Autre un peu moins precise mais tres rapide
 dico = wtspecq_statlog32(x, 2, 1, np.array(2), int(np.log2(x.shape[1])), 0, 0)
@@ -58,49 +58,52 @@ H = img8.get_data()[mask]
 img9 = masker.inverse_transform(aest)
 aest = img9.get_data()[mask]
 
-if choice == 1:
-    l1_ratio = 0
-    f = lambda lbda: mtvsolver(H, aest,
-                                        Elog, Varlog,
-                                        nj, j1, j2,mask,
-                                        lipschitz_constant=0,
-                                        l1_ratio = l1_ratio, l=lbda)
-    title = 'wetvp'
+
+l1_ratio = 0
+ftv = lambda lbda: mtvsolver(H, aest,
+                                    Elog, Varlog,
+                                    nj, j1, j2,mask,
+                                    lipschitz_constant=0,
+                                    l1_ratio = l1_ratio, l=lbda)
+titletv = 'wetvp'
+
+f = lambda x, lbda: jhem(x, aest,
+                          Elog, Varlog, nj, j1, j2, mask, l=lbda)
+#We set epsilon to 0
+g = lambda x, lbda: gradjhem(x, aest, Elog, Varlog, nj, j1, j2, mask,
+                               l=lbda)
+
+fg = lambda x, lbda, **kwargs: (f(x, lbda), g(x, lbda))
+fmin = lambda lbda: fmin_l_bfgs_b(lambda x: fg(x, lbda), H)
+titlel2 = 'JHem_GradJHem'
+
+lbda = 2
+
+monmintv = ftv(lbda)
+img = masker.inverse_transform(monmintv[0])
+output_file = ('/volatile/hubert/beamer/brain_' + titletv + '%.1f_nonsmoothed.pdf' %(lbda))
+p = plot_stat_map(img, output_file=output_file)
 
 
-if choice == 2:
-    l1_ratio = 0
-    f = lambda lbda: mtvsolverbis(np.concatenate((estimate,
-                                                            aest)),
-                                        Elog, Varlog,
-                                        nj, j1, j2,mask, max_iter = 100,
-                                        l1_ratio = l1_ratio,
-                                        lipschitz_constant=0, l=lbda)
-    title = 'wetvp_bis'
+monminl2 = fmin(lbda)
+img = masker.inverse_transform(monminl2[0])
+output_file = ('/volatile/hubert/beamer/brain_' + titlel2 + '%.1f_nonsmoothed.pdf' %(lbda))
+p = plot_stat_map(img, output_file=output_file)
 
-lmax = 15
-#minimiseurs = list()
-#cg = np.zeros(lmax)
-r = np.arange(lmax)
-lbda = np.array((0,) + tuple(1.5 ** r[:-1]))
+diff = monmintv[0] - monminl2[0]
+img = masker.inverse_transform(diff)
+output_file = ('/volatile/hubert/beamer/brain_diff%.1f_nonsmoothed.pdf' %(lbda))
+p = plot_stat_map(img, output_file=output_file)
+
+img = masker.inverse_transform(diff**2)
+output_file = ('/volatile/hubert/beamer/brain_squarediff%.1f_nonsmoothed.pdf' %(lbda))
+p = plot_stat_map(img, output_file=output_file)
 
 
-if choice % 2 == 1:
-    for idx in r:
-        monmin = f(lbda[idx])
-        img = masker.inverse_transform(monmin[0])
-        output_file = ('/volatile/hubert/beamer/brain_' + title + '%.1f_nonsmoothed.pdf' %(lbda[idx],))
-
-        p = plot_stat_map(img, output_file=output_file)
-        #p.title('Lambda = %.3f' % lbda[idx])
-        #minimiseurs.append(img)
-else:
-    for idx in r:
-        monmin = f(lbda[idx])
-        img = masker.inverse_transform(
-                monmin[0][:monmin[0].shape[0] / 2])
-        p = plot_stat_map(img, output_file=output_file)
-        #p.title('Lambda = %.3f' % lbda[idx])
-        #minimiseurs.append(img)
+absdiff = np.abs(diff)
+absdiff = absdiff * (absdiff > 0.02)
+img = masker.inverse_transform(absdiff)
+output_file = ('/volatile/hubert/beamer/brain_seuilabsdiff%.1f_nonsmoothed.pdf' %(lbda))
+p = plot_stat_map(img, output_file=output_file)
 
 plt.show()

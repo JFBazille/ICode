@@ -8,9 +8,9 @@ import ICode.Estimators.Wavelet as EW
 import time
 from ICode.Estimators.Wavelet.Hurst_Discrete_Wavelet import Hurst_DWt2
 tic = time.time()
-f = scio.loadmat('ICode/simulations/simulationsfGn2.mat')
-#f = scio.loadmat('/volatile/hubert/datas/simulations/simulationsfBn.mat')
-simulations = f['simulations']
+from ICode.opas import get_simulation
+
+simulations = get_simulation()
 #number of different h
 n = simulations.shape[0]
 #number of simulation for a given h

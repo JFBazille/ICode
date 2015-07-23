@@ -2,9 +2,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import Normalize
-import time
-tic = time.time()
-from scipy.optimize import fmin_l_bfgs_b, check_grad
 from ICode.estimators import penalyzed
 import ICode.opas as opas
 from ICode.optimize.objective_functions import _unmask

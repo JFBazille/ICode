@@ -351,7 +351,9 @@ fig2, axes2 = plt.subplots(nrows=3, ncols=int(ceil(lmax / 3.)))
 for idx, (dat, ax, ax2) in enumerate(zip(minimiseurs, axes.flat, axes2.flat)):
     im = ax.imshow(dat, norm=Normalize(vmin=np.min(minimiseurs),
                                        vmax=np.max(minimiseurs)))
+    im.set_interpolation('nearest')
     im2 = ax2.imshow(dat)
+    im2.set_interpolation('nearest')
     #image[int(idx/5.)*shape[0]:(int(idx/5.)+1)*shape[0],
     #(idx%5)*shape[1]:(idx%5+1)*shape[0]] = dat
     ax.set_title("l = %.1f " % (lbda[idx]))

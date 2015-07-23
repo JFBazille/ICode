@@ -3,11 +3,10 @@
 import scipy.io as scio
 import numpy as np
 from ICode.Estimators import WelchS
+from ICode.opas import get_simulation
 
-f = scio.loadmat('ICode/simulations/simulationsfGn2.mat')
+simulations = get_simulation()
 
-
-simulations = f['simulations']
 #number of different h
 n = simulations.shape[0]
 #number of simulation for a given h

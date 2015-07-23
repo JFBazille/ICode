@@ -1,21 +1,18 @@
 ##This function have been made to test specifically wtspecq_statlog32
 import scipy.io as scio
 import numpy as np
-from ICode.ProgressBar import ProgressBar
+from ICode.progressbar import ProgressBar
 import matplotlib.pyplot as plt
-import ICode.Estimators.Wavelet as EW
 import time
 tic = time.time()
-f = scio.loadmat('ICode/simulations/simulationsfGn2.mat')
-from ICode.Estimators.Wavelet.HDW_plagiate import *
+from ICode.estimators.wavelet.hdwpab import *
+from ICode.opas import get_simulation
 
+simulations = get_simulation()
 
 j1=2
 j2=8
 wtype = 1
- 
-
-simulations = f['simulations']
 #number of different h
 n = simulations.shape[0]
 #number of simulation for a given h
@@ -39,7 +36,7 @@ for i in np.arange(0,n):
 print 'computation time   ::  ' + str(time.time() - tic)+'\n'
 
 fig = plt.figure(100)
-bp = plt.boxplot(estimate.T, labels=np.arange(1,10)/10.)
+bp = plt.boxplot(estimate.T)
 s = 'Wavelet'
 #plt.title('Estimation of Hurst\ncoeffician of fBm by\n'+s+'of length'+str(l)+'method')
 k=0

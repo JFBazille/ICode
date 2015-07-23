@@ -3,11 +3,9 @@
 import scipy.io as scio
 import numpy as np
 from ICode.Estimators import Welch
+from ICode.opas import get_simulation
 
-f = scio.loadmat('ICode/simulations/simulationsfGn514.mat')
-
-
-simulations = f['simulations']
+simulations = get_simulation()
 #number of different h
 
 #number of simulation for a given h
@@ -25,11 +23,7 @@ for j in range(N):
 
   
 
-f = open('/volatile/hubert/datas/simulations/Python_Welche_results','w')
-
-
-    
-  
+f = open('Python_Welche_results','w')
 
 f.write('\n\n----------welch-----------------------\n \n')
 f.write('Htheo\tH mean estimate for a fGn \t Var estimation\n')

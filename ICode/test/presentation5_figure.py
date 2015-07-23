@@ -5,9 +5,9 @@ from nitime.timeseries import TimeSeries
 import matplotlib.pyplot as plt
 from ICode.Estimators.Wavelet.HDW_plagiate import *
 from matplotlib.colors import Normalize
-f = scio.loadmat('ICode/simulations/simulationsfGn2.mat')
+from ICode.opas import get_simulation
 
-simulations = f['simulations']
+simulations = get_simulation()
 ## Plotter signal 1D pour H = 0.8
 plt.figure()
 signal = simulations[7,1]

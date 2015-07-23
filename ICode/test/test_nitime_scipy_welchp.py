@@ -6,9 +6,9 @@ import pickle
 import matplotlib.pyplot as plt
 from ICode.Estimators.Hexp_Welchp import Hurstexp_Welchper as HW
 #from Estimators.Hexp_Welchp import Hurstexp_Welchper_scipy as HWs
-f = scio.loadmat('ICode/simulations/simulationsfGn2.mat')
+from ICode.opas import get_simulation
 
-simulations = f['simulations']
+simulations = get_simulation()
 #number of different h
 n = simulations.shape[0]
 #number of simulation for a given h

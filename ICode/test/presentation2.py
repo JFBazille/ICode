@@ -3,15 +3,15 @@ import pickle
 import numpy as np
 import matplotlib.pyplot as plt
 
-mdata = scio.loadmat('ICode/simulations/matlab_estimations_4096.mat')
+mdata = scio.loadmat('./ICode/test/matlab_estimations_4096.mat')
 mdfal = mdata['dfa']
 mwhittlel = mdata['whittle']
 
-mdata = scio.loadmat('ICode/matlab_estimations_514.mat')
+mdata = scio.loadmat('./ICode/test/matlab_estimations_514.mat')
 mdfas = mdata['dfa']
 mwhittles = mdata['whittle']
 
-with open('ICode/Results/resultat_test_estimators','rb') as fichier:
+with open('./ICode/test/resultat_test_estimators','rb') as fichier:
   unpickler = pickle.Unpickler(fichier)
   donnees = unpickler.load()
 
@@ -27,7 +27,7 @@ for cle, valeur in donnees.items():
       fig = plt.figure(i)
       f, myplots = plt.subplots(1,2,sharey=True)
       f.suptitle('Estimation of Hurst\ncoefficient of fGn\nof length 514  by Whittle method')
-      bp = myplots[0].boxplot(valeur.T, labels=np.arange(1,10)/10.)
+      bp = myplots[0].boxplot(valeur.T)
       myplots[0].set_title('Python estimator')
       myplots[1].set_title('Matlab estimator')
       for line in bp['medians']:
@@ -44,7 +44,7 @@ for cle, valeur in donnees.items():
 	      horizontalalignment='center') # draw above, centered
 	k = k+1
       k=0
-      bp = myplots[1].boxplot(mwhittles.T, labels=np.arange(1,10)/10.)
+      bp = myplots[1].boxplot(mwhittles.T)
       for line in bp['medians']:
 	# get position data for median line
 	x, y = line.get_xydata()[1] # top of median line
@@ -66,7 +66,7 @@ for cle, valeur in donnees.items():
       myplots[0].set_title('Python estimator')
       myplots[1].set_title('Matlab estimator')
       f.suptitle('Estimation of Hurst\ncoefficient of fGn\nof length 4096  by DFA method')
-      bp = myplots[0].boxplot(valeur.T, labels=np.arange(1,10)/10.)
+      bp = myplots[0].boxplot(valeur.T)
       for line in bp['medians']:
 	# get position data for median line
 	x, y = line.get_xydata()[1] # top of median line
@@ -81,7 +81,7 @@ for cle, valeur in donnees.items():
 	      horizontalalignment='center') # draw above, centered
 	k = k+1
       k=0
-      bp = myplots[1].boxplot(mwhittles.T, labels=np.arange(1,10)/10.)
+      bp = myplots[1].boxplot(mwhittles.T)
       for line in bp['medians']:
 	# get position data for median line
 	x, y = line.get_xydata()[1] # top of median line
@@ -104,7 +104,7 @@ for cle, valeur in donnees.items():
       myplots[0].set_title('Python estimator')
       myplots[1].set_title('Matlab estimator')
       f.suptitle('Estimation of Hurst\ncoefficient of fGn\nof length 514  by DFA method')
-      bp = myplots[0].boxplot(valeur.T, labels=np.arange(1,10)/10.)
+      bp = myplots[0].boxplot(valeur.T)
       for line in bp['medians']:# get position data for median line
 	x, y = line.get_xydata()[1] # top of median line
 	# overlay median value
@@ -118,7 +118,7 @@ for cle, valeur in donnees.items():
 	      horizontalalignment='center') # draw above, centered
 	k = k+1
       k=0
-      bp = myplots[1].boxplot(mwhittles.T, labels=np.arange(1,10)/10.)
+      bp = myplots[1].boxplot(mwhittles.T)
       for line in bp['medians']:# get position data for median line
 	x, y = line.get_xydata()[1] # top of median line
 	# overlay median value
@@ -139,7 +139,7 @@ for cle, valeur in donnees.items():
       myplots[0].set_title('Python estimator')
       myplots[1].set_title('Matlab estimator')
       f.suptitle('Estimation of Hurst\ncoefficient of fGn\nof length 4096  by DFA method')
-      bp = myplots[0].boxplot(valeur.T, labels=np.arange(1,10)/10.)
+      bp = myplots[0].boxplot(valeur.T)
       for line in bp['medians']:# get position data for median line
 	x, y = line.get_xydata()[1] # top of median line
 	# overlay median value
@@ -153,7 +153,7 @@ for cle, valeur in donnees.items():
 	      horizontalalignment='center') # draw above, centered
 	k = k+1
       k=0
-      bp = myplots[1].boxplot(mwhittles.T, labels=np.arange(1,10)/10.)
+      bp = myplots[1].boxplot(mwhittles.T)
       for line in bp['medians']:# get position data for median line
 	x, y = line.get_xydata()[1] # top of median line
 	# overlay median value
@@ -180,7 +180,7 @@ for cle, valeur in donnees.items():
       whelchfig = 1
       
     if '514' in cle:
-      bp = myplotswelch[0].boxplot(valeur.T, labels=np.arange(1,10)/10.)
+      bp = myplotswelch[0].boxplot(valeur.T)
       for line in bp['medians']:
 	# get position data for median line
 	x, y = line.get_xydata()[1] # top of median line
@@ -197,7 +197,7 @@ for cle, valeur in donnees.items():
       k=0
       
     if '4096' in cle:
-      bp = myplotswelch[1].boxplot(valeur.T, labels=np.arange(1,10)/10.)
+      bp = myplotswelch[1].boxplot(valeur.T)
       for line in bp['medians']:
 	# get position data for median line
 	x, y = line.get_xydata()[1] # top of median line
@@ -223,7 +223,7 @@ for cle, valeur in donnees.items():
       waveletfig = 1
       
     if '514' in cle:
-      bp = myplotswavelet[0].boxplot(valeur.T, labels=np.arange(1,10)/10.)
+      bp = myplotswavelet[0].boxplot(valeur.T)
       for line in bp['medians']:
 	# get position data for median line
 	x, y = line.get_xydata()[1] # top of median line
@@ -240,7 +240,7 @@ for cle, valeur in donnees.items():
       k=0
       
     if '4096' in cle:
-      bp = myplotswavelet[1].boxplot(valeur.T, labels=np.arange(1,10)/10.)
+      bp = myplotswavelet[1].boxplot(valeur.T)
       for line in bp['medians']:
 	# get position data for median line
 	x, y = line.get_xydata()[1] # top of median line
