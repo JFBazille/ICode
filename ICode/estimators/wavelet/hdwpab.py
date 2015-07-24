@@ -35,15 +35,17 @@ def hdw_p(appro, nb_vanishmoment=2, norm=1, q=np.array(2), nbvoies=None, distn=1
     dico = wtspecq_statlog32(appro, nb_vanishmoment, norm, q, nbvoies, distn, printout)
 
     if q.ndim:
-        for moment in q: 
-            tmp = regrespond_det2(dico['Elogmuqj'][0], dico['Varlogmuqj'][0], moment,
+        for idx, moment in enumerate(q): 
+            tmp = regrespond_det2(dico['Elogmuqj'][idx, 0], dico['Varlogmuqj'][idx, 0], moment,
                              dico['nj'], j1, j2, wtype)
     else:
-        tmp = regrespond_det2(dico['Elogmuqj'][0], dico['Varlogmuqj'][0], q,
+        tmp = regrespond_det32(dico['Elogmuqj'][:,0], dico['Varlogmuqj'][:,0], q,
                              dico['nj'], j1, j2, wtype)
     
     
-    return dico.update(tmp)
+    return {'Elogmuqj': dico['Elogmuqj'], 'Varlogmuqj': dico['Varlogmuqj'], 'nj': dico['nj'],
+            'logmuqj': dico['logmuqj'], 'Zeta': tmp['Zeta'], 'Vzeta': tmp['Vzeta'],
+            'aest': tmp['aest'], 'Q': tmp['Q'], 'jj': tmp['jj']}
 
 
 
@@ -538,7 +540,7 @@ def regrespond_det32(yj, varyj, q, nj, j1, j2, wtype):
 
     J = len(jj)
     njj = nj[jj]
-    if yjj.ndim==1:
+    if yj.ndim==1:
         yjj = yj[jj]
         varyjj = varyj[jj]
     else:
@@ -582,10 +584,10 @@ def regrespond_det32(yj, varyj, q, nj, j1, j2, wtype):
     vjj = (S2 - S1 * (jj + 1)) / wvarjj / (S0 * S2 - S1 * S1)
 
     #  Estimate  zeta
-    zetaest = np.sum(wjj * yjj, axis=-1)
+    zetaest = yjj.dot(wjj)
     # zeta is just the slope, unbiased regardless of the weights
     # intercept  'a'
-    aest = np.sum(vjj * yjj, axis=-1)
+    aest = yjj.dot(vjj)
 
     #Calculation of the variance of zetahat
     Vzeta = np.sum(varyjj * wjj * wjj, axis=-1)
@@ -594,14 +596,16 @@ def regrespond_det32(yj, varyj, q, nj, j1, j2, wtype):
     #--- Goodness of fit, based on inputted variances
     #   If at least 3 points, Apply a Chi-2 test , no level chosen,
     #should be viewed as a function of j1
-
-    if J > 2:
-        J2 = (J - 2) / 2.
-        X = np.sum(((yjj - zetaest * (jj + 1) - aest) ** 2.) / varyjj, axis=-1)
-        Q = 1 - gammainc(J2, X / 2.)
-    else:
-        print '\n***** Cannot calculate Q, need at least 3 points.\n'
-        Q = 0
+    #I don't use that code it produces memory errors
+    #if J > 2:
+        #J2 = (J - 2) / 2.
+        #Y = yjj - np.outer(jj + 1, zetaest).T - np.outer(aest, np.ones(len(jj)))
+        #X = Y.dot(Y.T) / varyjj
+        #Q = 1 - gammainc(J2, X / 2.)
+    #else:
+        #print '\n***** Cannot calculate Q, need at least 3 points.\n'
+        #Q = 0
+    Q = 0
 
     return {'Zeta': zetaest, 'Vzeta': Vzeta, 'aest': aest, 'Q': Q, 'jj': jj}
 
@@ -736,7 +740,6 @@ def rlistcoefdaub(regu):
 
 
 def  logstat(X, printout):
-    #--- Initialize
     n = len(X)
     conv_cutoff = 6
     #  don't cut into more than 2^6 blocks , estimate becomes bad.

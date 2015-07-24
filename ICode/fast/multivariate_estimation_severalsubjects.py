@@ -58,13 +58,12 @@ for x,masker in extractor:
                 nj = dico['nj']
             Bar.update(j + 1)
     else:
-        dico = hdw_p(x, nbvanishmoment, norm=1, q=np.array(2), nbvoies=int(np.log2(x.shape[1])), distn=0, wtype=wtype, j1=j1, j2=j1, printout=0)
+        dico = hdw_p(x, nbvanishmoment, norm=1, q=np.array(2), nbvoies=int(np.log2(x.shape[1])), distn=0, wtype=wtype, j1=j1, j2=j2, printout=0)
         Elog = dico['Elogmuqj'][:, 0]
         Varlog = dico['Varlogmuqj'][:, 0]
         nj = dico['nj']
-        estimate = sortie['Zeta'] / 2.
-        aest = sortie['aest']
-        del dico
+        estimate = dico['Zeta'] / 2.
+        aest = dico['aest']
 
 
     #we create the image with the appropriate function
