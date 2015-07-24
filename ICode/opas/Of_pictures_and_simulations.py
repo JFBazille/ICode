@@ -1,10 +1,13 @@
 import numpy as np
 import scipy.io as scio
 from math import ceil
-import pyhrf
+from ICode.opas.scenarios import create_AR_noise
+
+
 def get_simulation(fichier =  '/volatile/hubert/ICode/ICode/opas/simulationsfGn2.mat'):
     f =  scio.loadmat(fichier)
     return f['simulations']
+
 
 def get_simulation_from_picture(picture = None, lsimul= 4096):
   f = scio.loadmat('./ICode/opas/simulationsfGn2.mat')
@@ -47,6 +50,38 @@ def add_parterns(simulation,*functions,**kwargs):
   for fnc in functions : 
     retour = retour + func(s,retour.shape[-1])
   return np.reshape(retour, simulation.shape)
+
+def add_AR_noise(simulation, v_noise, order=2, v_corr=0.1, transpose=True):
+    if transpose:
+        simulation = simulation.T
+
+    simulation += create_AR_noise(simulation.shape, v_noise, order, v_corr)
+    
+    if transpose:
+        return simulation.T
+    
+    return simulation
+
+def get_cumsum_AR_noised_simulation(lsimul=4096, v_noise=0.5, order=2, v_corr=0.1):
+    simulations = get_simulation()
+
+    s = (reduce(lambda a,b : a*b , (1,) + simulations.shape[:-1]))
+    simulations = np.reshape(np.array(simulations),(s,simulations.shape[-1]))[:,:lsimul]
+    simulations = np.cumsum(simulations, axis=-1)
+
+    return add_AR_noise(simulations, v_noise, order, v_corr)
+
+def get_cumsum_AR_noised_simulation_from_picture(picture=None,lsimul=4096, v_noise=0.5, order=2, v_corr=0.1):
+    if picture is None:
+        raise ValueError("'picture' is a None value")
+
+    simulations = get_simulation_from_picture(picture, lsimul)
+    s = (reduce(lambda a,b : a*b , (1,) + simulations.shape[:-1]))
+    simulations = np.reshape(np.array(simulations),(s,simulations.shape[-1]))
+    simulations = np.cumsum(simulations, axis=-1)
+
+    return add_AR_noise(simulations, v_noise, order, v_corr)
+
 
 
 def square(l=10):

@@ -5,6 +5,8 @@ import os
 import ICode.opas as opas
 import scipy.io as scio
 from ICode.estimators.wavelet import wtspecq_statlog32, regrespond_det2
+from ICode.estimators import hurstexp_welchper as welch_estimator
+from ICode.estimators import hurstexp_dfa
 from scipy.optimize import fmin_l_bfgs_b
 from ICode.optimize.objective_functions import _unmask
 from ICode.progressbar import ProgressBar
@@ -12,6 +14,153 @@ from ICode.estimators import penalized
 from scipy.ndimage.filters import gaussian_filter
 from math import ceil
 from matplotlib.colors import Normalize
+
+
+def compute_estimators_noised_signal(length_simul, v_noise=0.1):
+    simulations = opas.get_cumsum_AR_noised_simulation(length_simul, v_noise)
+    shape = (9, 1000, length_simul)
+    N = simulations.shape[0]
+
+    wavelet_estim = np.zeros(N)
+    nb_vanishmoment = 2
+    j1 = 2
+    j2 = 6
+    wtype = 1
+    dico = wtspecq_statlog32(simulations, nb_vanishmoment, 1, np.array(2),
+                                int(np.log2(length_simul)), 0, 0)
+    Elog = dico['Elogmuqj'][:, 0]
+    Varlog = dico['Varlogmuqj'][:, 0]
+    nj = dico['nj']
+    for j in np.arange(0, N):
+        sortie = regrespond_det2(Elog[j], Varlog[j], 2, nj, j1, j2, wtype)
+        wavelet_estim[j] = sortie['Zeta'] / 2. 
+    wavelet_estim = np.reshape(wavelet_estim, shape[:-1])
+
+    welch_estim = welch_estimator(simulations) / 2 - 0.5
+    welch_estim = np.reshape(welch_estim, shape[:-1])
+
+    dfa_estim = hurstexp_dfa(simulations)
+    dfa_estim = np.reshape(dfa_estim, shape[:-1])
+
+    return wavelet_estim, welch_estim, dfa_estim
+
+
+def diff_perf_boxplot_noised(title_prefix='test_boxplot_noised_', v_noise=0.1):
+    Wavelet_514, Welch_514, DFA_514 = compute_estimators_noised_signal(514, v_noise)
+    Wavelet_4096, Welch_4096, DFA_4096 = compute_estimators_noised_signal(4096, v_noise)
+    mlist = list()
+    mlist.append(('Wavelet', Wavelet_514))
+    mlist.append(('Welch', Welch_514))
+    mlist.append(('DFA', DFA_514))
+    mlist.append(('Wavelet', Wavelet_4096))
+    mlist.append(('Welch', Welch_4096))
+    mlist.append(('DFA', DFA_4096))
+
+
+    for i,(title,stat) in enumerate(mlist):
+        k = 0
+        if i == 0:
+            fig = plt.figure(0)
+            f, myplotswavelet = plt.subplots(1, 3, sharey=True)
+            f.suptitle('Estimation of Hurst coefficient of fGn\nof length 514 by different methods')
+
+        if i == 3:
+            fig = plt.figure(1)
+            f, myplotswavelet = plt.subplots(1, 3, sharey=True)
+            f.suptitle('Estimation of Hurst coefficient of fGn\nof length 4096 by differents methods')
+
+        idx_subplot = i%3
+        myplotswavelet[idx_subplot].set_title(title)
+
+        bp = myplotswavelet[idx_subplot].boxplot(stat.T)
+        for line in bp['medians']:# get position data for median line
+            x, y = line.get_xydata()[1] # top of median line
+            # overlay median value
+            if(k <6):
+                myplotswavelet[idx_subplot].text(x + 1.5, y - 0.02, '%.3f\n%.3e' % (np.mean(stat[k, :]),
+                                                    np.var(stat[k,:])),
+                horizontalalignment='center') # draw above, centered
+            else:
+                myplotswavelet[idx_subplot].text(x - 2, y - 0.02, '%.3f\n%.3e' % (np.mean(stat[k, :]),
+                                                    np.var(stat[k, :])),
+                    horizontalalignment='center') # draw above, centered
+            k +=1
+    plt.show()
+
+
+def compute_estimators(length_simul):
+    simulations = opas.get_simulation()[:,:,:length_simul]
+    shape = (9, 1000, length_simul)
+    simulations = np.reshape(simulations, (9000, length_simul))
+    N = simulations.shape[0]
+
+    wavelet_estim = np.zeros(N)
+    nb_vanishmoment = 2
+    j1 = 2
+    j2 = 6
+    wtype = 1
+    simulationsCS = np.cumsum(simulations, axis=-1)
+    dico = wtspecq_statlog32(simulationsCS, nb_vanishmoment, 1, np.array(2),
+                                int(np.log2(length_simul)), 0, 0)
+    Elog = dico['Elogmuqj'][:, 0]
+    Varlog = dico['Varlogmuqj'][:, 0]
+    nj = dico['nj']
+    for j in np.arange(0, N):
+        sortie = regrespond_det2(Elog[j], Varlog[j], 2, nj, j1, j2, wtype)
+        wavelet_estim[j] = sortie['Zeta'] / 2. 
+    wavelet_estim = np.reshape(wavelet_estim, shape[:-1])
+
+    welch_estim = welch_estimator(simulations)
+    welch_estim = np.reshape(welch_estim, shape[:-1])
+
+    dfa_estim = hurstexp_dfa(simulations, CumSum=1)
+    dfa_estim = np.reshape(dfa_estim, shape[:-1])
+
+    return wavelet_estim, welch_estim, dfa_estim
+
+
+def diff_perf_boxplot_computed(title_prefix='test_boxplot_noised_'):
+    Wavelet_514, Welch_514, DFA_514 = compute_estimators(514)
+    Wavelet_4096, Welch_4096, DFA_4096 = compute_estimators(4096)
+    mlist = list()
+    mlist.append(('Wavelet', Wavelet_514))
+    mlist.append(('Welch', Welch_514))
+    mlist.append(('DFA', DFA_514))
+    mlist.append(('Wavelet', Wavelet_4096))
+    mlist.append(('Welch', Welch_4096))
+    mlist.append(('DFA', DFA_4096))
+
+
+    for i,(title,stat) in enumerate(mlist):
+        k = 0
+        if i == 0:
+            fig = plt.figure(0)
+            f, myplotswavelet = plt.subplots(1, 3, sharey=True)
+            f.suptitle('Estimation of Hurst coefficient of fGn\nof length 514 by different methods')
+
+        if i == 3:
+            fig = plt.figure(1)
+            f, myplotswavelet = plt.subplots(1, 3, sharey=True)
+            f.suptitle('Estimation of Hurst coefficient of fGn\nof length 4096 by differents methods')
+
+        idx_subplot = i%3
+        myplotswavelet[idx_subplot].set_title(title)
+
+        bp = myplotswavelet[idx_subplot].boxplot(stat.T)
+        for line in bp['medians']:# get position data for median line
+            x, y = line.get_xydata()[1] # top of median line
+            # overlay median value
+            if(k <6):
+                myplotswavelet[idx_subplot].text(x + 1.5, y - 0.02, '%.3f\n%.3e' % (np.mean(stat[k, :]),
+                                                    np.var(stat[k,:])),
+                horizontalalignment='center') # draw above, centered
+            else:
+                myplotswavelet[idx_subplot].text(x - 2, y - 0.02, '%.3f\n%.3e' % (np.mean(stat[k, :]),
+                                                    np.var(stat[k, :])),
+                    horizontalalignment='center') # draw above, centered
+            k +=1
+    plt.show()
+
 
 def diff_perf_boxplot():
     with open(os.path.join('./ICode','test','resultat_test_estimators'),'rb') as fichier:
@@ -127,8 +276,7 @@ def plot_python_against_matlab_wavelet_all():
     plt.show()
 
 
-def test_simulated_image(j1=3, j2=6, wtype=1, length_simul=514, title_prefix='test_simulated_image',
-                         figure='smiley', size=10, mask=True):
+def test_simulated_image(j1=3, j2=6, wtype=1, length_simul=514, title_prefix='test_simulated_image',figure='smiley', size=10, mask=True):
     if figure=='smiley':
         s = opas.smiley(size)
     else:
@@ -147,7 +295,7 @@ def test_simulated_image(j1=3, j2=6, wtype=1, length_simul=514, title_prefix='te
 
     estimate = np.zeros(N)
     aest = np.zeros(N)
-    simulation=np.cumsum(sig, axis=1)
+    simulation = np.cumsum(sig, axis=1)
 
     #######################################################################
 

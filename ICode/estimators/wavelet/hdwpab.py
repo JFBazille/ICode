@@ -14,12 +14,12 @@ from scipy.special import gammainc
 from scipy.ndimage.filters import convolve1d as convolve
 
 
-def hdw_p(data, N=4, distn=0, q=np.array(2), j1=2, j2=8):
+def hdw_p(appro, nb_vanishmoment=2, norm=1, q=np.array(2), nbvoies=None, distn=1, wtype=1, j1=2, j2=8, printout=0):
     '''
-    This function compute the Hurst exponent of a signal 'data' using Discrete
+    This function compute the Hurst exponent of a signal 'appro' using Discrete
     Wavelet transform
 
-    data: data to be analysed
+    appro: data to be analysed
        N: number of Vanishing Moments of Daubechies Wavelets
     norm: wavelet normalisation convention:  1 = L1,  2 = L2
  nbvoies: number of octaves
@@ -27,35 +27,24 @@ def hdw_p(data, N=4, distn=0, q=np.array(2), j1=2, j2=8):
    distn: Hypothesis on the data distribution or `singal type':
               0: Gauss,  1: Non-G finite var, 2: AlphaStable or other
     '''
-    n = len(data)
-    nbvoies = int(np.log2(n))
-    norm = 1
-    printout = 0
-    #sigtype = 0
-    dico = wtspecq_statlog3(data, N, norm, q, nbvoies, distn, printout)
-    wtype = 1
-    q2 = q + 0
-    sortie = regrespond_det2(dico['Elogmuqj'][0], dico['Varlogmuqj'][0], q2,
-                             dico['nj'], j1, j2, wtype)
-    return sortie['Zeta'] / 2.
+    n = len(appro)
+    if nbvoies is None:
+        nbvoies = int(np.log2(n))
+    q = np.array(q)
 
+    dico = wtspecq_statlog32(appro, nb_vanishmoment, norm, q, nbvoies, distn, printout)
 
-def hdw_p2(data, N=4, distn=0, q=np.array(2), j1=2, j2=8):
-    '''
-    This function compute the Hurst exponent of a signal 'data'
-    using Discrete Wavelet transform
-    '''
-    n = len(data)
-    nbvoies = int(np.log2(n))
-    norm = 1
-    printout = 0
-    #sigtype = 0
-    dico = wtspecq_statlog32(data, N, norm, q, nbvoies, distn, printout)
-    wtype = 1
-    q2 = q + 0
-    sortie = regrespond_det2(dico['Elogmuqj'][0], dico['Varlogmuqj'][0], q2,
+    if q.ndim:
+        for moment in q: 
+            tmp = regrespond_det2(dico['Elogmuqj'][0], dico['Varlogmuqj'][0], moment,
                              dico['nj'], j1, j2, wtype)
-    return sortie['Zeta'] / 2.
+    else:
+        tmp = regrespond_det2(dico['Elogmuqj'][0], dico['Varlogmuqj'][0], q,
+                             dico['nj'], j1, j2, wtype)
+    
+    
+    return dico.update(tmp)
+
 
 
 def wtspecq_statlog3(appro, N, norm, q, nbvoies, distn, printout):
@@ -67,6 +56,7 @@ def wtspecq_statlog3(appro, N, norm, q, nbvoies, distn, printout):
     l = list()
     loge = np.log2(np.e)
     #The format of q is important it has to be checked
+    q = np.array(q)
     if q.ndim == 0:
         lenq = 1
         tq = True
@@ -231,7 +221,7 @@ def wtspecq_statlog3(appro, N, norm, q, nbvoies, distn, printout):
         del convolue
 
     return {'Elogmuqj': Elogmuqj, 'Varlogmuqj': Varlogmuqj, 'nj': nj,
-            'logmuqj': logmuqj, 'gg1': gg1, 'gjj': gjj, 'l': l}
+            'logmuqj': logmuqj}
 
 
 def wtspecq_statlog32(appro,N,norm,q,nbvoies,distn,printout) :
@@ -246,6 +236,7 @@ def wtspecq_statlog32(appro,N,norm,q,nbvoies,distn,printout) :
     #print 'distn' + str(distn)
     l = list()
     loge = np.log2(np.e)
+    q = np.array(q)
     if q.ndim == 0:
         lenq = 1
         tq = True
@@ -425,7 +416,7 @@ def wtspecq_statlog32(appro,N,norm,q,nbvoies,distn,printout) :
         del convolue
 
     return {'Elogmuqj': Elogmuqj, 'Varlogmuqj': Varlogmuqj, 'nj': nj,
-            'logmuqj': logmuqj, 'gg1': gg1, 'gjj': gjj, 'l': l}
+            'logmuqj': logmuqj}
 
 
 #---------------------------------------------------------------------------
@@ -527,6 +518,86 @@ def regrespond_det2(yj, varyj, q, nj, j1, j2, wtype):
     if J > 2:
         J2 = (J - 2) / 2.
         X = sum(((yjj - zetaest * (jj + 1) - aest) ** 2.) / varyjj)
+        Q = 1 - gammainc(J2, X / 2.)
+    else:
+        print '\n***** Cannot calculate Q, need at least 3 points.\n'
+        Q = 0
+
+    return {'Zeta': zetaest, 'Vzeta': Vzeta, 'aest': aest, 'Q': Q, 'jj': jj}
+
+
+def regrespond_det32(yj, varyj, q, nj, j1, j2, wtype):
+    scalemax = yj.shape[-1]
+    j = np.arange(0, scalemax)
+    #--- Check and clean up the inputted j1 and j2
+    j1 = max(1, j1)  # make sure j1 is not too small
+    j2 = max(j1 + 1, min(j2, scalemax))  # make sure j2 is not chosen too large
+
+    #--- Convenience variables in the chosen scaling range
+    jj = np.arange(j1 - 1, j2)
+
+    J = len(jj)
+    njj = nj[jj]
+    if yjj.ndim==1:
+        yjj = yj[jj]
+        varyjj = varyj[jj]
+    else:
+        yjj = yj[:,jj]
+        varyjj = varyj[:,jj]
+    # -- Calculate the weighted linear regression over  j1..j2
+
+    #Notes
+    # wtype = 1:  Here use     varyj ~ C/nj  to create the weights,
+    #rather than use the varyj, to avoid
+    # poor varyj estimation from generating bad weights.
+    # This captures the essence of the weights,
+    #  and the result is independant of C.
+    #Thus no need to tell this function which "version"
+    #  is being used (see wtspecq_statlog for more details)
+
+    # define the effective varjj's used, depending on weight type
+    if wtype == 0:
+        # uniform weights
+        wvarjj = np.ones(J)
+        wstr = 'Uniform'
+    elif wtype == 1:
+        # Gaussian type weights
+        wvarjj = 1. / njj
+        wstr = 'Gaussian'
+    elif  wtype == 2:
+        # weights from data
+        wvarjj = varyjj
+        wstr = 'Estimated'
+    else:
+        #% all other cases
+        print '** Weight option not recognised, using uniform weights\n'
+        wvarjj = np.ones(1, J)
+        wstr = 'Uniform'
+    #% use weighted regression formula in all cases
+
+    S0 = sum(1. / wvarjj)
+    S1 = sum((jj + 1) / wvarjj)
+    S2 = sum((jj + 1) ** 2. / wvarjj)
+    wjj = (S0 * (jj + 1) - S1) / wvarjj / (S0 * S2 - S1 * S1)
+    vjj = (S2 - S1 * (jj + 1)) / wvarjj / (S0 * S2 - S1 * S1)
+
+    #  Estimate  zeta
+    zetaest = np.sum(wjj * yjj, axis=-1)
+    # zeta is just the slope, unbiased regardless of the weights
+    # intercept  'a'
+    aest = np.sum(vjj * yjj, axis=-1)
+
+    #Calculation of the variance of zetahat
+    Vzeta = np.sum(varyjj * wjj * wjj, axis=-1)
+    #this is exact if the varyjj are
+
+    #--- Goodness of fit, based on inputted variances
+    #   If at least 3 points, Apply a Chi-2 test , no level chosen,
+    #should be viewed as a function of j1
+
+    if J > 2:
+        J2 = (J - 2) / 2.
+        X = np.sum(((yjj - zetaest * (jj + 1) - aest) ** 2.) / varyjj, axis=-1)
         Q = 1 - gammainc(J2, X / 2.)
     else:
         print '\n***** Cannot calculate Q, need at least 3 points.\n'

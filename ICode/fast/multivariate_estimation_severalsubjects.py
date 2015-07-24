@@ -9,7 +9,7 @@ from ICode.extractsignals import signal_extractor
 from ICode.estimators.wavelet import *
 from ICode.progressbar import ProgressBar
 from ICode.loader import load_dynacomp
-from ICode.estimators.penalyzed import mtvsolver, mtvsolverbis
+from ICode.estimators.penalized import mtvsolver, mtvsolverbis, lipschitz_constant_gradf
 import itertools
 from scipy.optimize import fmin_l_bfgs_b
 import os
@@ -36,14 +36,14 @@ for x,masker in extractor:
     N = x.shape[0]
     l = x.shape[1]
     Bar = ProgressBar(N, 60, 'Work in progress')
-    estimate = np.zeros(N)
-    aest = np.zeros(N)
+
     nbvoies = min(int(np.log2(l / (2 * nbvanishmoment + 1))), int(np.log2(l)))
     if statlog == 1:
         Bar = ProgressBar(N, 60, 'Work in progress')
         Elog = np.zeros((N, nbvoies))
         Varlog = np.zeros((N, nbvoies))
-
+        estimate = np.zeros(N)
+        aest = np.zeros(N)
         for j in np.arange(0, N):
             Bar.update(j)
             dico = wtspecq_statlog3(x[j], nbvanishmoment, 1, np.array(2),
@@ -58,18 +58,14 @@ for x,masker in extractor:
                 nj = dico['nj']
             Bar.update(j + 1)
     else:
-        dico = wtspecq_statlog32(x, nbvanishmoment, 1, np.array(2), int(np.log2(x.shape[1])), 0, 0)
+        dico = hdw_p(x, nbvanishmoment, norm=1, q=np.array(2), nbvoies=int(np.log2(x.shape[1])), distn=0, wtype=wtype, j1=j1, j2=j1, printout=0)
         Elog = dico['Elogmuqj'][:, 0]
         Varlog = dico['Varlogmuqj'][:, 0]
         nj = dico['nj']
+        estimate = sortie['Zeta'] / 2.
+        aest = sortie['aest']
         del dico
 
-        for j in np.arange(0, N):
-            sortie = regrespond_det2(Elog[j], Varlog[j], 2, nj, j1, j2, wtype)
-            estimate[j] = sortie['Zeta'] / 2.
-            aest[j] = sortie['aest']
-            Bar.update(j)
-    del sortie
 
     #we create the image with the appropriate function
     imgHurst = masker.inverse_transform(estimate)
@@ -84,10 +80,11 @@ for x,masker in extractor:
     aest = imgaest.get_data()[mask]
 
     l1_ratio = 0
+    lipschitz_constant = lipschitz_constant_gradf(j1,j2,Varlog, nj, wtype)
     f = lambda lbda: mtvsolver(H, aest,
                                Elog, Varlog,
                                nj, j1, j2,mask,
-                               lipschitz_constant=0,
+                               lipschitz_constant=lipschitz_constant,
                                l1_ratio = l1_ratio, l=lbda)
     title = 'brain_wetvp_lbda1_subject' + str(idx_subject) + '.pdf'
 
