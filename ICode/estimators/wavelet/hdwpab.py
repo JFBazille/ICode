@@ -29,7 +29,7 @@ def hdw_p(appro, nb_vanishmoment=2, norm=1, q=np.array(2), nbvoies=None, distn=1
    distn: Hypothesis on the data distribution or `singal type':
               0: Gauss,  1: Non-G finite var, 2: AlphaStable or other
     '''
-    n = len(appro)
+    n = appro.shape[-1]
     if nbvoies is None:
         nbvoies = int(np.log2(n))
     q = np.array(q)
@@ -38,16 +38,16 @@ def hdw_p(appro, nb_vanishmoment=2, norm=1, q=np.array(2), nbvoies=None, distn=1
 
     if q.ndim:
         for idx, moment in enumerate(q): 
-            tmp = regrespond_det2(dico['Elogmuqj'][idx, 0], dico['Varlogmuqj'][idx, 0], moment,
+            tmp = regrespond_det2(dico['Elogmuqj'][idx, 0], dico['Varlogmuqj'][idx, 0],
                              dico['nj'], j1, j2, wtype)
     else:
-        tmp = regrespond_det32(dico['Elogmuqj'][:,0], dico['Varlogmuqj'][:,0], q,
+        tmp = regrespond_det32(dico['Elogmuqj'][:,0], dico['Varlogmuqj'][:,0],
                              dico['nj'], j1, j2, wtype)
     
     
     return {'Elogmuqj': dico['Elogmuqj'], 'Varlogmuqj': dico['Varlogmuqj'], 'nj': dico['nj'],
             'logmuqj': dico['logmuqj'], 'Zeta': tmp['Zeta'], 'Vzeta': tmp['Vzeta'],
-            'aest': tmp['aest'], 'Q': tmp['Q'], 'jj': tmp['jj']}
+            'aest': tmp['aest'], 'jj': tmp['jj']}
 
 
 
@@ -453,9 +453,9 @@ def wtspecq_statlog32(appro,N,norm,q,nbvoies,distn,printout) :
 #                        observed data over the scale range  (j1,j2)
 
 
-def regrespond_det2(yj, varyj, q, nj, j1, j2, wtype):
+def regrespond_det2(yj, varyj, nj, j1, j2, wtype=1):
     scalemax = len(yj)
-    j=np.arange(0, scalemax)
+    j = np.arange(0, scalemax)
     #--- Check and clean up the inputted j1 and j2
     j1 = max(1, j1)  # make sure j1 is not too small
     j2 = max(j1 + 1, min(j2, scalemax))  # make sure j2 is not chosen too large
@@ -529,7 +529,7 @@ def regrespond_det2(yj, varyj, q, nj, j1, j2, wtype):
     return {'Zeta': zetaest, 'Vzeta': Vzeta, 'aest': aest, 'Q': Q, 'jj': jj}
 
 
-def regrespond_det32(yj, varyj, q, nj, j1, j2, wtype):
+def regrespond_det32(yj, varyj, nj, j1, j2, wtype):
     scalemax = yj.shape[-1]
     j = np.arange(0, scalemax)
     #--- Check and clean up the inputted j1 and j2
@@ -592,23 +592,9 @@ def regrespond_det32(yj, varyj, q, nj, j1, j2, wtype):
 
     #Calculation of the variance of zetahat
     Vzeta = np.sum(varyjj * wjj * wjj, axis=-1)
-    #this is exact if the varyjj are
 
-    #--- Goodness of fit, based on inputted variances
-    #   If at least 3 points, Apply a Chi-2 test , no level chosen,
-    #should be viewed as a function of j1
-    #I don't use that code it produces memory errors
-    #if J > 2:
-        #J2 = (J - 2) / 2.
-        #Y = yjj - np.outer(jj + 1, zetaest).T - np.outer(aest, np.ones(len(jj)))
-        #X = Y.dot(Y.T) / varyjj
-        #Q = 1 - gammainc(J2, X / 2.)
-    #else:
-        #print '\n***** Cannot calculate Q, need at least 3 points.\n'
-        #Q = 0
-    Q = 0
 
-    return {'Zeta': zetaest, 'Vzeta': Vzeta, 'aest': aest, 'Q': Q, 'jj': jj}
+    return {'Zeta': zetaest, 'Vzeta': Vzeta, 'aest': aest, 'jj': jj}
 
 
 def rlistcoefdaub(regu):

@@ -4,9 +4,9 @@ import matplotlib.pyplot as plt
 import os
 import ICode.opas as opas
 import scipy.io as scio
-from ICode.estimators.wavelet import wtspecq_statlog32, regrespond_det2
-from ICode.estimators import hurstexp_welchper as welch_estimator
-from ICode.estimators import hurstexp_dfa
+from ICode.estimators.wavelet import wtspecq_statlog32, regrespond_det2, regrespond_det32
+from ICode.estimators.welch import hurstexp_welchper as welch_estimator
+from ICode.estimators.dfa import hurstexp_dfa
 from scipy.optimize import fmin_l_bfgs_b
 from ICode.optimize.objective_functions import _unmask
 from ICode.progressbar import ProgressBar
@@ -117,6 +117,45 @@ def compute_estimators(length_simul):
     dfa_estim = np.reshape(dfa_estim, shape[:-1])
 
     return wavelet_estim, welch_estim, dfa_estim
+
+
+def compute_dfa_estimators(length_simul=4069, printout=0):
+    simulations = opas.get_simulation()[:,:,:length_simul]
+    shape = (9, 1000, length_simul)
+    simulations = np.reshape(simulations, (9000, length_simul))
+    N = simulations.shape[0]
+    j1 = 2
+    j2 = 6
+    wtype = 1
+    dfa_estim, dico = hurstexp_dfa(simulations, CumSum=1, polyfit=1)
+    dfa_estim1, dico = hurstexp_dfa(simulations, CumSum=1)
+    dfa_estim2, dico = hurstexp_dfa(simulations, CumSum=1, wtype=0)
+    k = 0
+
+    if printout!=0:
+        f, myplot = plt.subplots(1, 3, sharey=True)
+        f.suptitle('Estimation of Hurst coefficient of fGn\nof length 514 by dfa implementation')
+
+        for idx_subplot, (title, stat) in enumerate(zip(['dfa0', 'dfa1', 'dfa2'], [np.reshape(dfa_estim, shape[:-1]),
+                                                        np.reshape(dfa_estim1, shape[:-1]),
+                                                        np.reshape(dfa_estim2, shape[:-1])])):
+            myplot[idx_subplot].set_title(title)
+            bp = myplot[idx_subplot].boxplot(stat.T)
+            for line in bp['medians']:
+                x, y = line.get_xydata()[1]
+                if(k <6):
+                    myplot[idx_subplot].text(x + 1.5, y - 0.02, '%.3f\n%.3e' % (np.mean(stat[k, :]),
+                                                                        np.var(stat[k,:])),
+                                    horizontalalignment='center')
+                else:
+                    myplot[idx_subplot].text(x - 2, y - 0.02, '%.3f\n%.3e' % (np.mean(stat[k, :]),
+                                                                        np.var(stat[k, :])),
+                                        horizontalalignment='center')
+                k += 1
+            k = 0
+        plt.show()
+
+    return dfa_estim, dfa_estim1, dfa_estim2
 
 
 def diff_perf_boxplot_computed(title_prefix='test_boxplot_noised_'):
@@ -258,7 +297,7 @@ def plot_python_against_matlab_wavelet(theoretical_Hurst=0.8):
     plt.show()
 
 
-def plot_python_against_matlab_wavelet_all(length = 4096, OUTPUT_FILE=None):
+def plot_python_against_matlab_wavelet_all(length=4096, OUTPUT_FILE=None):
     with open('./ICode/test/resultat_test_estimators','rb') as fichier:
         unpickler = pickle.Unpickler(fichier)
         donnees = unpickler.load()

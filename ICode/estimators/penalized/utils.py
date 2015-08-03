@@ -1,5 +1,8 @@
 import numpy as np
-__all__ = ['f', 'graf', 'fbis', 'gradfbis']
+
+__all__ = ['f', 'gradf', 'fbis', 'gradfbis']
+
+
 def f(H, aest, yij, varyj, nj, j1, j2, wtype=1):
     """
     f(Hi) is the L2 norme of the difference

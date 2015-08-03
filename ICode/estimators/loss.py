@@ -2,14 +2,13 @@ import numpy as np
 import ICode.optimize as o
 from ICode.optimize.objective_functions import _unmask
 from ICode.optimize import tv
-from ICode.optimize.objective_functions import _unmask
 from ICode.optimize.fista import mfista
 from ICode.optimize.proximal_operator import _prox_tvl1_with_intercept, _prox_tvl1
 
-__all__ = ['wavelet_loss', 'grad_wavelet_loss', 'mtvsolver', 'wl_l2_penalization_on_grad',
-           'grad_wl_l2_penalization_on_grad', 'lipschitz_constant_gradf']
+__all__ = ['l2_loss', 'grad_l2_loss', 'mtvsolver', 'l2_penalization_on_grad',
+           'grad_l2_penalization_on_grad', 'lipschitz_constant_gradf']
 
-def wavelet_loss(H, aest, yij, varyj, nj, j1, j2, wtype=1):
+def l2_loss(H, aest, yij, varyj, nj, j1, j2, wtype=1):
     """
     f(Hi) is the L2 norme of the difference
     between the estimated coefficient H
@@ -47,7 +46,7 @@ def wavelet_loss(H, aest, yij, varyj, nj, j1, j2, wtype=1):
     return np.sum(S)
 
 
-def grad_wavelet_loss(H, aest, yij, varyj, nj, j1, j2, wtype=1):
+def grad_l2_loss(H, aest, yij, varyj, nj, j1, j2, wtype=1):
     """This function is the gradient of the preceding function f
     """
     j2 = np.min((j2, len(nj)))
@@ -78,15 +77,15 @@ def grad_wavelet_loss(H, aest, yij, varyj, nj, j1, j2, wtype=1):
     return S
 
 
-def wl_l2_penalization_on_grad(H, aest, yij, varyj, nj, j1, j2, mask, l=1, wtype=1):
+def l2_penalization_on_grad(H, aest, yij, varyj, nj, j1, j2, mask, l=1, wtype=1):
     grad = o.grad_for_masked_data(H,mask)
-    return wavelet_loss(H, aest, yij, varyj, nj, j1, j2, wtype) + l * np.sum(grad**2)
+    return l2_loss(H, aest, yij, varyj, nj, j1, j2, wtype) + l * np.sum(grad**2)
 
 
-def grad_wl_l2_penalization_on_grad(H, aest, yij, varyj, nj, j1, j2, mask, l=1, wtype=1):
+def grad_l2_penalization_on_grad(H, aest, yij, varyj, nj, j1, j2, mask, l=1, wtype=1):
     grad = o.grad_for_masked_data(H,mask)
     div = o.div(grad)[mask]
-    return grad_wavelet_loss(H, aest, yij, varyj, nj, j1, j2,
+    return grad_l2_loss(H, aest, yij, varyj, nj, j1, j2,
                  wtype) - 2 * l * div
 
 
@@ -141,7 +140,7 @@ def mtvsolver(Hurst_init, aest, yij, varyj, nj, j1, j2,
     #ini["stepsize"] = 1 / lipschitz_constant
 
     def total_energy(x):
-        return wavelet_loss(x, aest, yij, varyj, nj, j1, j2, wtype) + l * tv(_unmask(x,mask))
+        return l2_loss(x, aest, yij, varyj, nj, j1, j2, wtype) + l * tv(_unmask(x,mask))
 
     def unmaskvec(w):
         return _unmask(w, mask)
@@ -150,7 +149,7 @@ def mtvsolver(Hurst_init, aest, yij, varyj, nj, j1, j2,
         return w[flat_mask]
 
     def f1_grad(x):
-        return grad_wavelet_loss(x, aest, yij, varyj, nj, j1, j2, wtype)
+        return grad_l2_loss(x, aest, yij, varyj, nj, j1, j2, wtype)
 
     def f2_prox(w, stepsize, dgap_tol, init):
         out, info = _prox_tvl1(unmaskvec(w),
