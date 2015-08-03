@@ -207,7 +207,7 @@ def diff_perf_boxplot():
     plt.show()
 
 
-def plot_syj_against_j(j1=2, j2=6, wtype=1, theoretical_Hurst=0.8, idx_simulation=0):
+def plot_syj_against_j(j1=2, j2=6, wtype=1, theoretical_Hurst=0.8, idx_simulation=0, OUTPUT_FILE=None):
     idx = int(theoretical_Hurst * 10) - 1
     if(idx < 0 or idx > 10):
         idx = 7
@@ -223,13 +223,15 @@ def plot_syj_against_j(j1=2, j2=6, wtype=1, theoretical_Hurst=0.8, idx_simulatio
     jmax = len(Elog)
 
     j_indices = np.arange(0,jmax + 2)
-    plt.plot(j_indices, j_indices * regression['Zeta'] + regression['aest'])
+    fig = plt.plot(j_indices, j_indices * regression['Zeta'] + regression['aest'])
     plt.text(j_indices.mean() - 2 * j_indices.var() / jmax, Elog.mean() + Elog.var() / jmax, r'Hurst Exponent = %.2f'%(regression['Zeta']/2))
 
     j_indices = np.arange(0,jmax) + 1
     plt.plot(j_indices, Elog, 'ro')
     plt.xlabel('scale j')
     plt.ylabel('Sy(j,2) value')
+    if not OUTPUT_FILE is None:
+        plt.savefig(OUTPUT_FILE)
     plt.show()
 
 
@@ -256,23 +258,27 @@ def plot_python_against_matlab_wavelet(theoretical_Hurst=0.8):
     plt.show()
 
 
-def plot_python_against_matlab_wavelet_all():
+def plot_python_against_matlab_wavelet_all(length = 4096, OUTPUT_FILE=None):
     with open('./ICode/test/resultat_test_estimators','rb') as fichier:
         unpickler = pickle.Unpickler(fichier)
         donnees = unpickler.load()
 
-    pwave_514 = donnees['Wavelet_514']
-    pwave_4096 = donnees['Wavelet_4096']
+    pwave = donnees['Wavelet_' + str(length)]
 
     mdata = scio.loadmat('./ICode/test/matlab_wavelet_estimations.mat')
-    mwave_4096 = mdata['matlab_wavelet_4096']
-    mwave_514 = mdata['matlab_wavelet_514']
-
-    mini = np.min((mwave_4096, pwave_4096)) - 0.01
-    maxi = np.max((mwave_4096, pwave_4096)) + 0.01
+    mwave = mdata['matlab_wavelet_'+str(length)]
+    
+    mini = np.min((mwave, pwave)) - 0.01
+    maxi = np.max((mwave, pwave)) + 0.01
     values = np.linspace(mini,maxi,1000)
-    plt.plot(mwave_4096.ravel(), pwave_4096.ravel(), 'ro')
+    plt.plot(mwave.ravel(), pwave.ravel(), 'ro')
     plt.plot(values,values)
+    plt.xlabel('Matlab function\'s output')
+    plt.ylabel('Python function\'s output')
+    plt.text(-0.1, 0.9,'$\mu = $ %.3e, $\sigma = $ %.3e' %(np.mean((mwave - pwave)**2), np.std((mwave - pwave)**2)))
+
+    if not OUTPUT_FILE is None:
+        plt.savefig(OUTPUT_FILE)
     plt.show()
 
 

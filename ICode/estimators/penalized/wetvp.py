@@ -10,33 +10,6 @@ J = sum(f(Hi)) + lambda x TV(H)
 """
 
 
-def lipschitz_constant_gradf(j1,j2,varyj, nj, wtype):
-    j2 = np.min((j2, len(nj)))
-    j1j2 = np.arange(j1 - 1, j2)
-    njj = nj[j1j2]
-    N = sum(njj)
-
-    #  uniform weights
-    if     wtype == 0:
-        wvarjj = np.ones(len(j1j2))
-        #wstr = 'Uniform'
-    #  Gaussian type weights
-    elif wtype == 1:
-        wvarjj = njj / N
-        #wstr = 'Gaussian'
-    #   % weights from data
-    elif  wtype == 2:
-        wvarjj = 1 / varyj
-        #wstr = 'Estimated'
-    # all other cases
-    else:
-        print '** Weight option not recognised, using uniform weights\n'
-        wvarjj = np.ones(1, len(j1j2))
-        #wstr = 'Uniform'
-
-    return np.sum(8 * ((j1j2 + 1) ** 2) * wvarjj)
-
-
 def mtvsolver(Hurst_init, aest, yij, varyj, nj, j1, j2,
               mask, max_iter=100, init=None,
               prox_max_iter=5000, tol=1e-4, call_back=None, verbose=1,

@@ -17,6 +17,7 @@ the data :
 """
 ##Same but these function are able to deal with a mask
 ##Usefull in my case with real datas !
+__all__ = ['loss_l2_penalization_on_grad', 'grad_loss_l2_penalization_on_grad']
 def loss_l2_penalization_on_grad(H, aest, yij, varyj, nj, j1, j2, mask, l=1, wtype=1):
     grad = o.grad_for_masked_data(H,mask)
     return f(H, aest, yij, varyj, nj, j1, j2, wtype) + l * np.sum(grad**2)

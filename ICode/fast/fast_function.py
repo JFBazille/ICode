@@ -46,18 +46,12 @@ def test_real_data_l2min(nbsubjects=1,lbda=1, title_prefix='test_real_data_l2min
         aest = np.zeros(N)
         nbvoies = min(int(np.log2(l / (2 * nbvanishmoment + 1))), int(np.log2(l)))
 
-        dico = wtspecq_statlog32(x, nbvanishmoment, 1, np.array(2), int(np.log2(x.shape[1])), 0, 0)
+        dico = hdw_p(x, nbvanishmoment, 1, np.array(2), int(np.log2(x.shape[1])),distn=0, wtype=wtype, j1=j1, j2=j2, printout=0)
         Elog = dico['Elogmuqj'][:, 0]
         Varlog = dico['Varlogmuqj'][:, 0]
         nj = dico['nj']
-        del dico
-
-        for j in np.arange(0, N):
-            sortie = regrespond_det2(Elog[j], Varlog[j], 2, nj, j1, j2, wtype)
-            estimate[j] = sortie['Zeta'] / 2.
-            aest[j] = sortie['aest']
-            Bar.update(j)
-        del sortie
+        estimate = dico['Zeta'] / 2.
+        aest = dico['aest']
 
         #we create the image with the appropriate function
         imgHurst = masker.inverse_transform(estimate)
@@ -66,7 +60,6 @@ def test_real_data_l2min(nbsubjects=1,lbda=1, title_prefix='test_real_data_l2min
         #all is plugged in the appropriate plotting function
         #VERY IMPORTANT DO NOT TRY DO DO SO WITH NON BOOLEAN VALUE !
         mask = masker.mask_img_.get_data() > 0
-        shape = mask.shape
         H = imgHurst.get_data()[mask]
         imgaest = masker.inverse_transform(aest)
         aest = imgaest.get_data()[mask]
@@ -180,7 +173,6 @@ def test_real_data_multivariate_analysis_ttest(nbsubjects=1,lbda=1, title_prefix
     extractor = extractor.extract()
     extractor = itertools.islice(extractor,idx_subject, nbsubjects)
 
-    nbvanishmoment = 2
     j1 = 2
     j2 = 6
     wtype = 1
@@ -233,7 +225,7 @@ def test_real_data_multivariate_analysis_ttest(nbsubjects=1,lbda=1, title_prefix
 
         #######################################################################
 
-        lipschitz_constant = wetvp.lipschitz_constant_gradf(j1,j2,Varlog, nj, wtype)
+        lipschitz_constant = lipschitz_constant_gradf(j1,j2,Varlog, nj, wtype)
         l1_ratio = 0
         tv_algo = lambda lbda: wetvp.mtvsolver(estimate, aest,
                                             Elog, Varlog,
@@ -245,66 +237,63 @@ def test_real_data_multivariate_analysis_ttest(nbsubjects=1,lbda=1, title_prefix
         ######################################################################
 
         if not isinstance(lbda, np.ndarray):
-            lbda = lbda
-            l2_dict[lbda] = list()
+            if not l2_dict.has_key(lbda):
+                l2_dict[lbda] = list()
             monmin = l2_algo(lbda)
+            l2_dict[lbda].append(monmin[0])
             img = masker.inverse_transform(monmin[0])
 
             output_file = os.path.join(OUTPUT_PATH, 'multivariate', l2_title + 'lambda' + str(lbda) + '.pdf')
             p = plot_stat_map(img, output_file=output_file)
-            l2_dict[lbda] = list()
-            l2_dict[lbda].append(monmin[0])
 
             output_file = os.path.join(OUTPUT_PATH, 'multivariate_normalized_color', l2_title + 'lambda' + str(lbda) + '.pdf')
             p = plot_stat_map(img, vmax=max_value, output_file=output_file)
-            l2_dict[lbda] = list()
-            l2_dict[lbda].append(monmin[0])
 
+            if not tv_dict.has_key(lbda):
+                tv_dict[lbda] = list()
             monmin = tv_algo(lbda)
-            img = masker.inverse_transform(monmin[0])
-            output_file = os.path.join(OUTPUT_PATH, 'multivariate', tv_title + 'lambda' + str(lbda) + '.pdf')
-
-            p = plot_stat_map(img, output_file=output_file)
-            tv_dict[lbda] = list()
             tv_dict[lbda].append(monmin[0])
+            img = masker.inverse_transform(monmin[0])
+
+            output_file = os.path.join(OUTPUT_PATH, 'multivariate', tv_title + 'lambda' + str(lbda) + '.pdf')
+            p = plot_stat_map(img, output_file=output_file)
 
             output_file = os.path.join(OUTPUT_PATH, 'multivariate_normalized_color', tv_title + 'lambda' + str(lbda) + '.pdf')
             p = plot_stat_map(img, vmax=max_value, output_file=output_file)
-            l2_dict[lbda] = list()
-            l2_dict[lbda].append(monmin[0])
+
 
         else:
             for lbda_loop in lbda:
-                l2_dict[lbda] = list()
-                monmin = l2_algo(lbda_loop[0])
+                if not l2_dict.has_key(lbda):
+                    l2_dict[lbda] = list()
+                monmin = l2_algo(lbda_loop)
+                l2_dict[lbda_loop].append(monmin[0])
                 img = masker.inverse_transform(monmin[0])
 
                 output_file = os.path.join(OUTPUT_PATH, 'multivariate', l2_title + 'lambda' + str(lbda_loop) + '.pdf')
                 p = plot_stat_map(img, output_file=output_file)
-                l2_dict[lbda_loop] = list()
-                l2_dict[lbda_loop].append(monmin[0])
+
 
                 output_file = os.path.join(OUTPUT_PATH, 'multivariate_normalized_color', l2_title + 'lambda' + str(lbda_loop) + '.pdf')
                 p = plot_stat_map(img, vmax=max_value, output_file=output_file)
-                l2_dict[lbda_loop] = list()
-                l2_dict[lbda_loop].append(monmin[0])
 
-                monmin = tv_algo(lbda[0])
-                img = masker.inverse_transform(monmin[0])
-                output_file = os.path.join(OUTPUT_PATH, 'multivariate', tv_title + 'lambda' + str(lbda_loop) + '.pdf')
-
-                p = plot_stat_map(img, output_file=output_file)
-                tv_dict[lbda_loop] = list()
+                if not tv_dict.has_key(lbda):
+                    tv_dict[lbda_loop] = list()
+                monmin = tv_algo(lbda_loop)
                 tv_dict[lbda_loop].append(monmin[0])
+                img = masker.inverse_transform(monmin[0])
+
+                output_file = os.path.join(OUTPUT_PATH, 'multivariate', tv_title + 'lambda' + str(lbda_loop) + '.pdf')
+                p = plot_stat_map(img, output_file=output_file)
+
 
                 output_file = os.path.join(OUTPUT_PATH, 'multivariate_normalized_color', tv_title + 'lambda' + str(lbda_loop) + '.pdf')
                 p = plot_stat_map(img, vmax=max_value, output_file=output_file)
-                l2_dict[lbda_loop] = list()
-                l2_dict[lbda_loop].append(monmin[0])
+
         idx_subject += 1
 
     ## ## ## ## ## ttest part  ## ## ## ## ##
-    t, proba = ttest(univariate_list)
+    t, proba = ttest(univariate_list, 0.5)
     logproba = - np.log10(proba)
     img = masker.inverse_transform(logproba)
     output_file = os.path.join(OUTPUT_PATH, 'ttest', 'univariate_test' + '.pdf')
@@ -315,19 +304,29 @@ def test_real_data_multivariate_analysis_ttest(nbsubjects=1,lbda=1, title_prefix
     p = plot_stat_map(img, output_file=output_file)
 
     if not isinstance(lbda, np.ndarray):
-        t, proba = ttest(l2_dict[lbda])
+        t, proba = ttest(l2_dict[lbda], 0.5)
         logproba = - np.log10(proba)
         img = masker.inverse_transform(logproba)
-        output_file = os.path.join(OUTPUT_PATH, 'ttest', 'multivariate_lambda' + str(lbda) + '.pdf')
+        output_file = os.path.join(OUTPUT_PATH, 'ttest', 'l2multivariate_lambda' + str(lbda) + '.pdf')
         p = plot_stat_map(img, output_file=output_file)
 
         img = masker.inverse_transform(logproba * np.array(logproba > 5, dtype=int))
-        output_file = os.path.join(OUTPUT_PATH, 'ttest', 'multivariate_threshold_lambda' + str(lbda) + '.pdf')
+        output_file = os.path.join(OUTPUT_PATH, 'ttest', 'l2multivariate_threshold_lambda' + str(lbda) + '.pdf')
+        p = plot_stat_map(img, output_file=output_file)
+
+        t, proba = ttest(tv_dict[lbda], 0.5)
+        logproba = - np.log10(proba)
+        img = masker.inverse_transform(logproba)
+        output_file = os.path.join(OUTPUT_PATH, 'ttest', 'tvmultivariate_lambda' + str(lbda) + '.pdf')
+        p = plot_stat_map(img, output_file=output_file)
+
+        img = masker.inverse_transform(logproba * np.array(logproba > 5, dtype=int))
+        output_file = os.path.join(OUTPUT_PATH, 'ttest', 'tvmultivariate_threshold_lambda' + str(lbda) + '.pdf')
         p = plot_stat_map(img, output_file=output_file)
 
     else:
         for lbda_loop in lbda:
-            t, proba = ttest(l2_dict[lbda_loop])
+            t, proba = ttest(l2_dict[lbda_loop], 0.5)
             logproba = - np.log10(proba)
             img = masker.inverse_transform(logproba)
             output_file = os.path.join(OUTPUT_PATH, 'ttest', 'multivariate_lambda' + str(lbda_loop) + '.pdf')
@@ -336,6 +335,7 @@ def test_real_data_multivariate_analysis_ttest(nbsubjects=1,lbda=1, title_prefix
             img = masker.inverse_transform(logproba * np.array(logproba > 5, dtype=int))
             output_file = os.path.join(OUTPUT_PATH, 'ttest', 'multivariate_threshold_lambda' + str(lbda_loop) + '.pdf')
             p = plot_stat_map(img, output_file=output_file)
-    plt.show()
+    
+    return {'uni': univariate_list, 'tv': tv_dict, 'l2': l2_dict}
 
 

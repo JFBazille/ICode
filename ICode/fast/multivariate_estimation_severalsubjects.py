@@ -12,23 +12,24 @@ from ICode.loader import load_dynacomp
 from ICode.estimators.penalized import mtvsolver, mtvsolverbis, lipschitz_constant_gradf
 import itertools
 from scipy.optimize import fmin_l_bfgs_b
+from scipy.stats import ttest_1samp as ttest
 import os
 
 statlog = 0
-OUTPUT_PATH = os.path.join('/volatile', 'hubert', 'beamer', 'multivariate_analysis5')
+OUTPUT_PATH = os.path.join('/volatile', 'hubert', 'beamer', 'multivariate_analysisnbvanish2')
 idx_subject = 0
-max_idx_subject = 15
+max_idx_subject = 1
 ##loading data
 dataset = load_dynacomp(preprocessing_folder='pipeline_1', prefix='wr')
 extractor = signal_extractor(dataset)
 extractor = extractor.extract()
 extractor = itertools.islice(extractor,idx_subject, max_idx_subject)
 
-nbvanishmoment = 4
+nbvanishmoment=2
 j1 = 2
 j2 = 6
 wtype = 1
-#lbda = 1
+lbda = 1
 mlist = list()
 
 for x,masker in extractor:
@@ -94,5 +95,15 @@ for x,masker in extractor:
     p = plot_stat_map(img, output_file=output_file)
     mlist.append(monmin[0])
     idx_subject += 1
+ 
+
+mlist = np.array(mlist)
+ 
+student_stat, proba = ttest(mlist, 0.5)
+student_mask = student_stat > 0
+proba[student_mask] = proba[student_mask]
+student_mask = np.invert(student_mask)
+proba[student_mask] = 1 -  proba[student_mask]
+
 
 plt.show()

@@ -13,6 +13,8 @@ from math import gamma
 from scipy.special import gammainc
 from scipy.ndimage.filters import convolve1d as convolve
 
+__all__ = ['hdw_p', 'wtspecq_statlog3', 'wtspecq_statlog32',
+           'regrespond_det2', 'regrespond_det32']
 
 def hdw_p(appro, nb_vanishmoment=2, norm=1, q=np.array(2), nbvoies=None, distn=1, wtype=1, j1=2, j2=8, printout=0):
     '''
@@ -422,7 +424,6 @@ def wtspecq_statlog32(appro,N,norm,q,nbvoies,distn,printout) :
 
 
 #---------------------------------------------------------------------------
-#regrespond_det2
 #Input:     q:  the order of the statistic used
 #           N:  the number of vanishing moments of the wavelet
 #               ((here only used in the plot title)

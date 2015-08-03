@@ -46,7 +46,7 @@ def add_parterns(simulation,*functions,**kwargs):
       a une simulation 
   """
   s = (reduce(lambda a,b : a*b , (1,) + simulation.shape[:-1]))
-  retour = np.reshape(np.array(simulation),s,simulation.shape[-1])
+  retour = np.reshape(np.array(simulation),(s,simulation.shape[-1]))
   for fnc in functions : 
     retour = retour + func(s,retour.shape[-1])
   return np.reshape(retour, simulation.shape)

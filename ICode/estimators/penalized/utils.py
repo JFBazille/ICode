@@ -1,5 +1,5 @@
 import numpy as np
-
+__all__ = ['f', 'graf', 'fbis', 'gradfbis']
 def f(H, aest, yij, varyj, nj, j1, j2, wtype=1):
     """
     f(Hi) is the L2 norme of the difference
@@ -157,3 +157,5 @@ def gradfbis(Haest, yij, varyj, nj, j1, j2, wtype=1, Gpfunc=None):
         GradH += Gpfunc(H)
     #return np.reshape((S + 2*l*H),(1,len(H)))
     return np.concatenate((GradH, Gaest))
+
+

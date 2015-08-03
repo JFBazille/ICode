@@ -1,2 +1,3 @@
 from hexp_welchp import hurstexp_welchper
 from dfa import hurstexp_dfa
+from wavelet_estimator import wavelet_worker
