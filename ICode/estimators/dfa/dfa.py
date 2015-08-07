@@ -9,7 +9,7 @@ __all__ = ["hurstexp_dfa"]
 
 
 
-def hurstexp_dfa(data, CumSum=0, j1=2, j2=8, polyfit=0, wtype=1, fignummer=0):
+def hurstexp_dfa(data, CumSum=0, j1=3, j2=7, polyfit=0, wtype=0, fignummer=0):
     """This function compute the DFA exponent of a signal,
     it gives the same result as the matlab function
     HDFAEstim of Biyu_code in schubert project
@@ -24,9 +24,9 @@ def hurstexp_dfa(data, CumSum=0, j1=2, j2=8, polyfit=0, wtype=1, fignummer=0):
     lendata = CSdata.shape[-1]
     b2 = j2
     if j2 > np.log2(lendata / 2):
-        b2 = int(np.log2(lendata / 4))
+        j2 = int(np.log2(lendata / 4))
     j1 = max(1, j1)
-    scales = np.arange(1, b2 + 1)
+    scales = np.arange(1, j2 + 1)
     scales = 2 ** scales
     n = lendata / scales
     nj = np.zeros(len(scales))
@@ -51,7 +51,7 @@ def hurstexp_dfa(data, CumSum=0, j1=2, j2=8, polyfit=0, wtype=1, fignummer=0):
         F[i] = np.mean(std_stat, axis=0)
     log2F_dfa = np.log2(F)
     if polyfit==1:
-        tmp = np.polyfit(np.log2(scales[j1-1:]), log2F_dfa[j1-1:], deg=1)
+        tmp = np.polyfit(np.log2(scales[j1-1:j2]), log2F_dfa[j1-1:j2], deg=1)
         aest = tmp[1]
         alpha = tmp[0]
         if fignummer > 0:

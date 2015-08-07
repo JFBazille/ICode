@@ -1,16 +1,27 @@
+import os
 import numpy as np
 import scipy.io as scio
 from math import ceil
 from ICode.opas.scenarios import create_AR_noise
 
+__all__ = ["base_dir", "get_simulation", "get_simulation_from_picture", "square", "square2", "smiley"]
 
-def get_simulation(fichier =  '/volatile/hubert/ICode/ICode/opas/simulationsfGn2.mat'):
+
+def base_dir():
+    """ base_dir
+    """
+    return os.path.dirname(__file__)
+
+
+def get_simulation(fichier =  'simulationsfGn2.mat'):
+    fichier = os.path.join(base_dir(), fichier)
     f =  scio.loadmat(fichier)
     return f['simulations']
 
 
 def get_simulation_from_picture(picture = None, lsimul= 4096):
-  f = scio.loadmat('./ICode/opas/simulationsfGn2.mat')
+  fichier = os.path.join(base_dir(), 'simulationsfGn2.mat')
+  f = scio.loadmat(fichier)
   simulations = f['simulations']
   n = simulations.shape[1]
   if(picture is None):

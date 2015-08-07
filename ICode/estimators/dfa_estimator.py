@@ -8,7 +8,7 @@ from scipy.optimize import fmin_l_bfgs_b
 
 __all__ = ['dfa_estimator', 'dfa_l2_estimator', 'dfa_tv_estimator', 'dfa_worker']
 
-def dfa_worker(imgs, masker, regu='off', lbda=1, wtype=1, j1=2, j2=8):
+def dfa_worker(imgs, masker, regu='off', lbda=1, wtype=0, j1=3, j2=7):
 
     appro = masker.fit_transform(imgs)
     appro = appro.T
@@ -28,7 +28,7 @@ def dfa_worker(imgs, masker, regu='off', lbda=1, wtype=1, j1=2, j2=8):
         raise ValueError('no regu =  implemented')
 
 
-def dfa_estimator(appro, mask=None, wtype=1, j1=2, j2=8):
+def dfa_estimator(appro, mask=None, wtype=0, j1=3, j2=7):
     """
     This function estimate the Hurst exponent of a signal based
     on Detrend Fluctuation Analysis.
@@ -62,7 +62,7 @@ def dfa_estimator(appro, mask=None, wtype=1, j1=2, j2=8):
     return Hurst_exponent
 
 
-def dfa_tv_estimator(appro, mask=None, wtype=1, j1=2, j2=8, lbda=1):
+def dfa_tv_estimator(appro, mask=None, wtype=0, j1=3, j2=7, lbda=1):
     """
     This function estimate the Hurst exponent of a signal based
     on Daubechies' Wavelet coeffecients.
@@ -109,7 +109,7 @@ def dfa_tv_estimator(appro, mask=None, wtype=1, j1=2, j2=8, lbda=1):
     return Hurst_exponent, Hmin[0]
 
 
-def dfa_l2_estimator(appro, mask=None, wtype=1, j1=2, j2=8, lbda=1):
+def dfa_l2_estimator(appro, mask=None, wtype=0, j1=3, j2=7, lbda=1):
     """
     This function estimate the Hurst exponent of a signal based
     on Detrend Fluctuation Analysis.
