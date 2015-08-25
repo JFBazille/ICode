@@ -21,7 +21,7 @@ def welch_worker(imgs, masker, regu='off', lbda=1):
         return welch_tv_estimator(appro, mask,lbda, consider_fBm=True)[1]
 
     if regu=='l2':
-        return welch_l2_estimator(appro, mask, wtype, lbda, consider_fBm=True)[1]
+        return welch_l2_estimator(appro, mask, lbda, consider_fBm=True)[1]
 
     else:
         #raise ValueError('no regu = %s implemented' %(regu,))

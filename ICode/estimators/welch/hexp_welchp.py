@@ -87,8 +87,8 @@ def welch_squared_loss(H, aest, log2frq, log2pwr,   compute_energy=True, compute
     return energy, grad
 
 
-def welch_squared_loss_l2pen(H, aest,log2frq, log2pwr,  mask, l=1):
-    loss, grad_loss = welch_squared_loss(H, aest, log2frq, log2pwr,  compute_energy=True, compute_grad=True)
+def welch_squared_loss_l2pen(H, aest,log2frq, log2pwr,  mask, l=1, consider_fBm=False):
+    loss, grad_loss = welch_squared_loss(H, aest, log2frq, log2pwr,  compute_energy=True, compute_grad=True, consider_fBm=consider_fBm)
     grad = o.grad_for_masked_data(H,mask)
     div = o.div(grad)[mask]
     return loss + l * np.dot(grad.ravel(), grad.ravel()), grad_loss - 2 * l * div
@@ -119,10 +119,10 @@ def tv_welch_solver(Hurst_init, aest, log2frq, log2pwr,
     H_size = len(Hurst_init)
 
     if lipschitz_constant==0:
-        lipschitz_constant = lipschitz_constant_grad_welch_square_loss(log2frq, consider_fBm)
+        lipschitz_constant = lipschitz_constant_grad_welch_square_loss(log2frq, consider_fBm=consider_fBm)
 
     def total_energy(x):
-        return welch_squared_loss(x, aest, log2frq, log2pwr,  compute_energy=True, compute_grad=False, consider_fBm)
+        return welch_squared_loss(x, aest, log2frq, log2pwr,  compute_energy=True, compute_grad=False, consider_fBm=consider_fBm)
 
     def unmaskvec(w):
         return _unmask(w, mask)
@@ -131,7 +131,7 @@ def tv_welch_solver(Hurst_init, aest, log2frq, log2pwr,
         return w[flat_mask]
 
     def f1_grad(x):
-        return welch_squared_loss(x, aest,log2frq, log2pwr,  compute_energy=False, compute_grad=True, consider_fBm)
+        return welch_squared_loss(x, aest,log2frq, log2pwr,  compute_energy=False, compute_grad=True, consider_fBm=consider_fBm)
 
     def f2_prox(w, stepsize, dgap_tol, init):
         out, info = _prox_tvl1(unmaskvec(w),

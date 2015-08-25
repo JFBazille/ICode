@@ -5,7 +5,7 @@
  test_preg for a test of several regularity)
 """
 
-import sys
+import sys, os
 import numpy as np
 import scipy.io as scio
 import matplotlib.pyplot as plt
@@ -87,7 +87,7 @@ def wtspecq_statlog3(appro, N, norm, q, nbvoies, distn, printout):
         #--- Load tabulated values of Expectation and variances for |N(0,1)|^q.
         #for Gaussian case
         #load varndq_gauss_tab
-        loadeddata = scio.loadmat('ICode/estimators/wavelet/varndq_gauss_tab.mat')
+        loadeddata = scio.loadmat(os.path.join(os.path.dirname(__file__),'varndq_gauss_tab.mat'))
         Nlim = np.reshape(loadeddata['Nlim'], 11)
         Ntab = np.reshape(loadeddata['Ntab'], 12)
         biaisgauss_tab = loadeddata['biaisgauss_tab']
@@ -282,7 +282,7 @@ def wtspecq_statlog32(appro,N,norm,q,nbvoies,distn,printout) :
         #--- Load tabulated values of Expectation and
         # variances for |N(0,1)|^q. for Gaussian case
         # load varndq_gauss_tab
-        loadeddata = scio.loadmat('ICode/estimators/wavelet/varndq_gauss_tab.mat')
+        loadeddata = scio.loadmat(os.path.join(os.path.dirname(__file__),'varndq_gauss_tab.mat'))
         Nlim = np.reshape(loadeddata['Nlim'], 11)
         Ntab = np.reshape(loadeddata['Ntab'], 12)
         biaisgauss_tab = loadeddata['biaisgauss_tab']

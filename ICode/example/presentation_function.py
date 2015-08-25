@@ -4,16 +4,27 @@ import matplotlib.pyplot as plt
 import os
 import ICode.opas as opas
 import scipy.io as scio
-from ICode.estimators.wavelet import wtspecq_statlog32, regrespond_det2, regrespond_det32
-from ICode.estimators.welch import hurstexp_welchper as welch_estimator
-from ICode.estimators.dfa import hurstexp_dfa
+from matplotlib import rc as changefont
+from ICode.estimators import *
+from ICode.estimators import penalized
+#from ICode.estimators.wavelet import hdw_p,wtspecq_statlog3,  wtspecq_statlog32, regrespond_det2, regrespond_det32
+#from ICode.estimators.welch import hurstexp_welchper as welch_estimator
+#from ICode.estimators.dfa import hurstexp_dfa
 from scipy.optimize import fmin_l_bfgs_b
 from ICode.optimize.objective_functions import _unmask
 from ICode.progressbar import ProgressBar
-from ICode.estimators import penalized
 from scipy.ndimage.filters import gaussian_filter
 from math import ceil
 from matplotlib.colors import Normalize
+
+__all__ = ["base_dir", "compute_estimators",
+           "compute_dfa_estimators", "plot_syj_against_j",
+           "test_simulated_image", "diff_perf_boxplot_computed", "diff_perf_boxplot"]
+
+def base_dir():
+    """ base_dir
+    """
+    return os.path.dirname(__file__)
 
 
 def compute_estimators_noised_signal(length_simul, v_noise=0.1):
@@ -202,7 +213,7 @@ def diff_perf_boxplot_computed(title_prefix='test_boxplot_noised_'):
 
 
 def diff_perf_boxplot():
-    with open(os.path.join('./ICode','test','resultat_test_estimators'),'rb') as fichier:
+    with open(os.path.join(base_dir(),'resultat_test_estimators'),'rb') as fichier:
         unpickler = pickle.Unpickler(fichier)
         data = unpickler.load()
 
@@ -257,8 +268,11 @@ def plot_syj_against_j(j1=2, j2=6, wtype=1, theoretical_Hurst=0.8, idx_simulatio
     Elog = dico['Elogmuqj'][0]
     Varlog = dico['Varlogmuqj'][0]
     nj = dico['nj']
-    regression = regrespond_det2(Elog, Varlog, np.array(2), nj, j1, j2, wtype)
-    
+    regression = regrespond_det2(Elog, Varlog, nj, j1, j2, wtype)
+    font = {'family' : 'normal',
+        'weight' : 'bold',
+        'size'   : 22}
+    changefont('font', **font)
     jmax = len(Elog)
 
     j_indices = np.arange(0,jmax + 2)
@@ -268,7 +282,7 @@ def plot_syj_against_j(j1=2, j2=6, wtype=1, theoretical_Hurst=0.8, idx_simulatio
     j_indices = np.arange(0,jmax) + 1
     plt.plot(j_indices, Elog, 'ro')
     plt.xlabel('scale j')
-    plt.ylabel('Sy(j,2) value')
+    plt.ylabel('log Sy(j,2)')
     if not OUTPUT_FILE is None:
         plt.savefig(OUTPUT_FILE)
     plt.show()
@@ -278,14 +292,14 @@ def plot_python_against_matlab_wavelet(theoretical_Hurst=0.8):
     idx = int(theoretical_Hurst * 10) - 1
     if(idx < 0 or idx > 10):
         idx = 7
-    with open('./ICode/test/resultat_test_estimators','rb') as fichier:
+    with open(os.path.join(base_dir(),'resultat_test_estimators'),'rb') as fichier:
         unpickler = pickle.Unpickler(fichier)
         donnees = unpickler.load()
 
     pwave_514 = donnees['Wavelet_514']
     pwave_4096 = donnees['Wavelet_4096']
 
-    mdata = scio.loadmat('./ICode/test/matlab_wavelet_estimations.mat')
+    mdata = scio.loadmat(os.path.join(base_dir(), 'matlab_wavelet_estimations.mat'))
     mwave_4096 = mdata['matlab_wavelet_4096']
     mwave_514 = mdata['matlab_wavelet_514']
 
@@ -296,15 +310,37 @@ def plot_python_against_matlab_wavelet(theoretical_Hurst=0.8):
     plt.plot(values,values)
     plt.show()
 
+def plot_python_against_matlab_dfa(theoretical_Hurst=0.8):
+    idx = int(theoretical_Hurst * 10) - 1
+    if(idx < 0 or idx > 10):
+        idx = 7
+    with open(os.path.join(base_dir(),'resultat_test_estimators'),'rb') as fichier:
+        unpickler = pickle.Unpickler(fichier)
+        donnees = unpickler.load()
+
+    pwave_514 = donnees['DFA_514']
+    pwave_4096 = donnees['DFA_4096']
+
+    mdata = scio.loadmat(os.path.join(base_dir(), 'matlab_wavelet_estimations.mat'))
+    mwave_4096 = mdata['matlab_wavelet_4096']
+    mwave_514 = mdata['matlab_wavelet_514']
+
+    mini = np.min((mwave_4096[idx], pwave_4096[idx])) - 0.01
+    maxi = np.max((mwave_4096[idx], pwave_4096[idx])) + 0.01
+    values = np.linspace(mini,maxi,1000)
+    plt.plot(mwave_4096[idx], pwave_4096[idx], 'ro')
+    plt.plot(values,values)
+    plt.show() 
+
 
 def plot_python_against_matlab_wavelet_all(length=4096, OUTPUT_FILE=None):
-    with open('./ICode/test/resultat_test_estimators','rb') as fichier:
+    with open(os.path.join(base_dir(),'resultat_test_estimators'),'rb') as fichier:
         unpickler = pickle.Unpickler(fichier)
         donnees = unpickler.load()
 
     pwave = donnees['Wavelet_' + str(length)]
 
-    mdata = scio.loadmat('./ICode/test/matlab_wavelet_estimations.mat')
+    mdata = scio.loadmat(os.path.join(base_dir(),'matlab_wavelet_estimations.mat'))
     mwave = mdata['matlab_wavelet_'+str(length)]
     
     mini = np.min((mwave, pwave)) - 0.01
@@ -321,7 +357,71 @@ def plot_python_against_matlab_wavelet_all(length=4096, OUTPUT_FILE=None):
     plt.show()
 
 
-def test_simulated_image(j1=3, j2=6, wtype=1, length_simul=514, title_prefix='test_simulated_image',figure='smiley', size=10, mask=True):
+def test_simulated_image2(j1=3, j2=6, wtype=1, length_simul=514,
+                title_prefix='test_simulated_image', figure='smiley', size=10, mask=True):
+    if figure=='smiley':
+        s = opas.smiley(size)
+    else:
+        s = opas.square2(size)
+
+    if mask:
+        mask = s > 0.1
+    else:
+        mask = np.ones(s.shape, dtype=bool)
+
+    signal = opas.get_simulation_from_picture(s, lsimul=514)
+    signalshape = signal.shape
+    shape = signalshape[:- 1]
+    sig514 = signal[mask]
+
+    signal = opas.get_simulation_from_picture(s, lsimul=4096)
+    signalshape = signal.shape
+    shape = signalshape[:- 1]
+    sig4096 = signal[mask]
+    N = sig4096.shape[0]
+
+    simulation514 = np.cumsum(sig514, axis=1)
+    simulation4096 = np.cumsum(sig4096, axis=1)
+    #######################################################################
+
+    dico = hdw_p(simulation514, 2, 1, np.array(2),
+                                int(np.log2(length_simul)), 0, wtype, j1, j2, 0)
+
+    estimate514 = dico['Zeta'] / 2. #normalement Zeta
+
+    #######################################################################
+
+    dico = hdw_p(simulation4096, 2, 1, np.array(2),
+                                int(np.log2(length_simul)), 0, wtype, j1, j2, 0)
+
+    estimate4096 = dico['Zeta'] / 2. #normalement Zeta
+
+    #######################################################################
+
+    fig = plt.figure(1)
+
+    im = plt.imshow(_unmask(estimate514, mask), norm=Normalize(vmin=np.min(estimate514),
+                                    vmax=np.max(estimate514)),
+                                    interpolation='nearest')
+    plt.axis('off')
+
+    fig2 = plt.figure(2)
+
+    im2 = plt.imshow(_unmask(estimate4096, mask),norm=Normalize(vmin=np.min(estimate514),
+                                    vmax=np.max(estimate514)),
+                                    interpolation='nearest')
+    plt.axis('off')
+
+    cax = fig.add_axes([0.91, 0.1, 0.028, 0.8])
+    fig.colorbar(im, cax=cax)
+    cax2 = fig2.add_axes([0.91, 0.1, 0.028, 0.8])
+    fig2.colorbar(im2, cax=cax2)
+
+    plt.show()
+
+
+def test_simulated_image(j1=3, j2=6, wtype=1, length_simul=514,
+                title_prefix='test_simulated_image', figure='smiley', size=10, mask=True):
     if figure=='smiley':
         s = opas.smiley(size)
     else:
@@ -502,4 +602,29 @@ def test_simulated_image(j1=3, j2=6, wtype=1, length_simul=514, title_prefix='te
     fig3.savefig('/volatile/hubert/beamer/graphics/juillet2015/' + title + '_rmse.pdf')
     print title
 
+    plt.show()
+
+
+def test_simulated_image_welch(length_simul=514,
+                title_prefix='test_simulated_image', figure='smiley', lbda=1, size=10, mask=True):
+    if figure=='smiley':
+        s = opas.smiley(size)
+    else:
+        s = opas.square2(size)
+
+    if mask:
+        mask = s > 0.1
+    else:
+        mask = np.ones(s.shape, dtype=bool)
+
+    signal = opas.get_simulation_from_picture(s, lsimul=length_simul)[mask]
+
+    estimate, regularized = welch_estimator.welch_tv_estimator(signal, mask, lbda)
+    
+    plt.imshow(_unmask(estimate,mask))
+    plt.colorbar()
+    plt.figure()
+    
+    plt.imshow(_unmask(regularized,mask))
+    plt.colorbar()
     plt.show()

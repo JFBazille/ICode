@@ -6,7 +6,8 @@ class signal_extractor():
 
     def __init__(self, dataset = None):
         self.dataset = dataset
-        self.masker = NiftiMasker(mask_img = self.dataset.mask,
+        if dataset.has_key('mask'):
+            self.masker = NiftiMasker(mask_img = self.dataset.mask,
                                 low_pass = .1,
                                 high_pass = .01,
                                 smoothing_fwhm =6.,
@@ -15,10 +16,18 @@ class signal_extractor():
                                 standardize = False,
                                 memory_level = 0,
                                 verbose=5)
-
-
+        else:
+            self.masker = NiftiMasker(
+                                low_pass = .1,
+                                high_pass = .01,
+                                smoothing_fwhm =6.,
+                                t_r = 1.05,
+                                detrend = True,
+                                standardize = False,
+                                memory_level = 0,
+                                verbose=5)
     def extract(self):
-        for idx, func in enumerate([self.dataset.func1, self.dataset.func2]):
+        for idx, func in enumerate([self.dataset.func1]):
             #add mask, smoothing, filter and detrending
 
 

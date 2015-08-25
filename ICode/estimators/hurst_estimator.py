@@ -117,10 +117,10 @@ class Hurst_Estimator(BaseEstimator, TransformerMixin):
             monpickler = pickle.Pickler(myfile)
             monpickler.dump(self.hurst)
 
-    def load_map(self, save_path='', save_file=None):
+    def load_map(self, INPUT_PATH='', save_file=None):
         if save_file is None:
             save_file = 'hurstmap_metric_' + self.metric +'_regu_'+ self.regu
-        save_file = os.path.join(save_path, save_file)
+        save_file = os.path.join(INPUT_PATH, save_file)
         with open(save_file,'rb') as myfile:
             monunpickler = pickle.Unpickler(myfile)
             self.hurst = monunpickler.load()
