@@ -111,7 +111,7 @@ class Hurst_Estimator(BaseEstimator, TransformerMixin):
             return
 
         if save_file is None:
-            save_file = 'hurstmap_metric_' + self.metric +'_regu_'+ self.regu
+            save_file = 'hurstmap_metric_' + self.metric +'_regu_'+ self.regu + str(self.lbda)
         save_file = os.path.join(save_path, save_file)
         with open(save_file,'wb') as myfile:
             monpickler = pickle.Pickler(myfile)

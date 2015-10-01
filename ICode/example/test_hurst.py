@@ -2,7 +2,7 @@
 """
 Created on Fri Jun 26 11:11:42 2015
 
-@author: mr243268
+
 """
 import os
 import numpy as np
@@ -128,16 +128,195 @@ def ttest_onesample_coef(coefs, threshold, fc):
 
 from joblib import Parallel, delayed
 
+def stat_ttest_function(conn, prefix='', OUTPUT_PATH=None):
+    fc = conn.hurst
+
+
+    ost = Parallel(n_jobs=3, verbose=5)(delayed(ttest_onesample)(group, 0.05, fc)
+                                        for group in ['v', 'av', 'avn'])
+
+    mht = Parallel(n_jobs=3, verbose=5)(delayed(ttest_onesample_Hmean)(group, 0.05, fc)
+                                        for group in ['v', 'av', 'avn'])
+    
+    
+    gr = ['v', 'av', 'avn']
+    if OUTPUT_PATH is None:
+        for i in range(3):
+
+            title = prefix + gr[i]
+            try:
+                img = conn.masker.inverse_transform(ost[i])
+                plot_stat_map(img, title='t-test H0 : H = 0.5 pvalue in -log10 scale groupe : ' + title)
+
+            except ValueError:
+                print "problem with ost " + title
+            try:
+                img = conn.masker.inverse_transform(mht[i])
+                plot_stat_map(img, title='t-test H0 : H = 0.5 pvalue in -log10 scale groupe : ' + title)
+
+            except ValueError:
+                print "problem with mht " + title
+            
+    else:
+        for i in range(3):
+
+            title = prefix + gr[i]
+            output_file = os.path.join(OUTPUT_PATH, title)
+            try:
+                img = conn.masker.inverse_transform(ost[i])
+                #plot_stat_map(img, title='t-test H0 : H = 0.5 pvalue in -log10 scale groupe : ' + title, output_file= output_file + '.pdf')
+                plot_stat_map(img, output_file= output_file + '.pdf')
+
+            except ValueError:
+                print "problem with ost " + title
+            try:
+                img = conn.masker.inverse_transform(mht[i])
+                #plot_stat_map(img, title='t-test H0 : H = 0.5 pvalue in -log10 scale groupe : ' + title, output_file= output_file + 'meanH.pdf')
+                plot_stat_map(img, output_file= output_file + 'meanH.pdf')
+
+            except ValueError:
+                print "problem with mht " + title
+
+def stat_function_tst(conn, prefix='', OUTPUT_PATH=None, threshold=0.05):
+    fc = conn.hurst
+
+    tst = Parallel(n_jobs=3, verbose=5)(delayed(ttest_group)(group, threshold, fc)
+                                    for group in groups)
+    
+    if OUTPUT_PATH is None:
+        font = {'family' : 'normal',
+            'size'   : 20}
+        changefont('font', **font)
+        gr = ['v', 'av', 'avn']
+        for i in range(3):
+            title = prefix + '_'.join(groups[i])
+            try:
+                img = conn.masker.inverse_transform(tst[i])
+                print title
+                plot_stat_map(img, cut_coords=(3, -63, 36))
+                plt.show()
+
+            except ValueError:
+                print "problem with tst " + title
+        changefont.func_defaults
+            
+    else:
+        for i in range(3):
+            title = prefix + '_'.join(groups[i])
+            output_file = os.path.join(OUTPUT_PATH, title)
+            try:
+                img = conn.masker.inverse_transform(tst[i])
+                plot_stat_map(img, cut_coords=(3, -63, 36), output_file=output_file + '.pdf')
+            except ValueError:
+                print "problem with tst " + title
+
+def stat_function(conn, prefix='', OUTPUT_PATH=None):
+    fc = conn.hurst
+
+    a = Parallel(n_jobs=3, verbose=5)(delayed(classify_group)(group, fc)
+                                        for group in groups)
+
+    tst = Parallel(n_jobs=3, verbose=5)(delayed(ttest_group)(group, .05, fc)
+                                    for group in groups)
+
+    ost = Parallel(n_jobs=3, verbose=5)(delayed(ttest_onesample)(group, 0.05, fc)
+                                        for group in ['v', 'av', 'avn'])
+
+    mht = Parallel(n_jobs=3, verbose=5)(delayed(ttest_onesample_Hmean)(group, 0.05, fc)
+                                        for group in ['v', 'av', 'avn'])
+
+    mpt = Parallel(n_jobs=3, verbose=5)(delayed(mne_permutation_ttest)(group,0.05, fc, 1)
+                                        for group in ['v', 'av', 'avn'])
+    
+    
+    cot = Parallel(n_jobs=3, verbose=5)(delayed(ttest_onesample_coef)(np.reshape(coef['coef'], (coef['coef'].shape[0], coef['coef'].shape[-1])),
+                                        0.05, fc)
+                                        for coef in a)
+    gr = ['v', 'av', 'avn']
+    if OUTPUT_PATH is None:
+        for i in range(3):
+            title = prefix + '_'.join(groups[i])
+            try:
+                img = conn.masker.inverse_transform(tst[i])
+                plot_stat_map(img, cut_coords=(3, -63, 36), title=title)
+
+            except ValueError:
+                print "problem with tst " + title
+            try:
+                img = conn.masker.inverse_transform(cot[i])
+                plot_stat_map(img, title='coef_map ' + title)
+
+            except ValueError:
+                print "problem with cot " + title
+
+            title = prefix + gr[i]
+            try:
+                img = conn.masker.inverse_transform(ost[i])
+                plot_stat_map(img, title='t-test H0 : H = 0.5 pvalue in -log10 scale groupe : ' + title)
+
+            except ValueError:
+                print "problem with ost " + title
+            try:
+                img = conn.masker.inverse_transform(mht[i])
+                plot_stat_map(img, title='t-test H0 : H = 0.5 pvalue in -log10 scale groupe : ' + title)
+
+            except ValueError:
+                print "problem with mht " + title
+            try:
+                img = conn.masker.inverse_transform(mpt[i])
+                plot_stat_map(img, title='t-test H0 : H = 0.5 pvalue in -log10 scale groupe : ' + title)
+
+            except ValueError:
+                print "problem with mpt " + title
+    else:
+        for i in range(3):
+            title = prefix + '_'.join(groups[i])
+            output_file = os.path.join(OUTPUT_PATH, title)
+            try:
+                img = conn.masker.inverse_transform(tst[i])
+                plot_stat_map(img, cut_coords=(3, -63, 36), title=title, output_file=output_file + '.pdf')
+
+            except ValueError:
+                print "problem with tst " + title
+            try:
+                img = conn.masker.inverse_transform(cot[i])
+                plot_stat_map(img, title='coef_map ' + title, output_file=output_file + 'coef_map.pdf')
+
+            except ValueError:
+                print "problem with cot " + title
+
+            title = prefix + gr[i]
+            output_file = os.path.join(OUTPUT_PATH, title)
+            try:
+                img = conn.masker.inverse_transform(ost[i])
+                plot_stat_map(img, title='t-test H0 : H = 0.5 pvalue in -log10 scale groupe : ' + title, output_file= output_file + '.pdf')
+
+            except ValueError:
+                print "problem with ost " + title
+            try:
+                img = conn.masker.inverse_transform(mht[i])
+                plot_stat_map(img, title='t-test H0 : H = 0.5 pvalue in -log10 scale groupe : ' + title, output_file= output_file + 'meanH.pdf')
+
+            except ValueError:
+                print "problem with mht " + title
+            try:
+                img = conn.masker.inverse_transform(mpt[i])
+                plot_stat_map(img, title='t-test H0 : H = 0.5 pvalue in -log10 scale groupe : ' + title, output_file= output_file + 'mnepermutH.pdf')
+
+            except ValueError:
+                print "problem with mpt " + title
 
 
 def compute_hurst_and_stat(metric='dfa', regu='off', OUTPUT_PATH = '/volatile/hubert/beamer/test_hurst/', plot=False):
-    conn = Hurst_Estimator(metric=metric, mask=dataset.mask, regu=regu, n_jobs=5)
-    os.write(1,'fit')
+    conn = Hurst_Estimator(metric=metric, mask=dataset.mask,smoothing_fwhm=0, regu=regu, n_jobs=5)
+    os.write(1,'fit\n')
     fc = conn.fit(dataset.func1)
-    os.write(1,'save')
-
+    #conn.load_map(INPUT_PATH)
+    os.write(1,'save\n')
+    #stat_function_tst(conn, metric+' '+regu+' ', OUTPUT_PATH)
     conn.save(save_path=OUTPUT_PATH)
     if plot:
+        os.write(1,'plot\n')
         a = Parallel(n_jobs=3, verbose=5)(delayed(classify_group)(group, fc)
                                         for group in groups)
 
@@ -186,25 +365,19 @@ def compute_hurst_and_stat(metric='dfa', regu='off', OUTPUT_PATH = '/volatile/hu
         plt.boxplot(map(lambda x: x['accuracy'], a))
         plt.savefig(os.path.join(OUTPUT_PATH, 'boxplot.pdf'))
 
-def stat_computed_hurst(metric='dfa', regu='off', INPUT_PATH = '/volatile/hubert/beamer/test_hurst/', OUTPUT_PATH=''):
-    conn = Hurst_Estimator(metric=metric, mask=dataset.mask, regu=regu, n_jobs=5)
-    os.write(1,'load\n')
-    conn.load_map(INPUT_PATH)
-    fc = conn.hurst
-    os.write(1,'stat\n')
+def stat_computed_hurst(metric= ['wavelet', 'dfa', 'welch'], regu = ['off', 'tv', 'l2'], INPUT_PATH = '/volatile/hubert/beamer/test_hurst/', OUTPUT_PATH=None):
+    for met in metric:
+        for reg in regu:
+            conn = Hurst_Estimator(metric=met, mask=dataset.mask, regu=reg, n_jobs=5)
+            os.write(1,'load\n')
+            conn.load_map(INPUT_PATH)
+            fc = conn.hurst
+            os.write(1,'stat\n')
+            stat_function_tst(conn, met+' '+reg+' ', OUTPUT_PATH)
+            stat_ttest_function(conn, met+' '+reg+' ', OUTPUT_PATH)
 
+    plt.show()
 
-    a = Parallel(n_jobs=3, verbose=5)(delayed(classify_group)(group, fc)
-                                        for group in groups)
-    font = {'family' : 'normal',
-        'weight' : 'bold',
-        'size'   : 18}
-    changefont('font', **font)
-
-    plt.figure()
-    plt.boxplot(map(lambda x: x['accuracy'], a))
-    plt.xlabel(groups)
-    plt.savefig(os.path.join(OUTPUT_PATH, metric+regu+'boxplot.pdf'))
 
 def diff_computed_hurst(metric='wavelet', regu='off', INPUT_PATH = '/volatile/hubert/beamer/test_hurst/', OUTPUT_PATH=''):
     conn = Hurst_Estimator(metric=metric, mask=dataset.mask, regu=regu, n_jobs=5)
@@ -222,3 +395,7 @@ def diff_computed_hurst(metric='wavelet', regu='off', INPUT_PATH = '/volatile/hu
     plt.show()
 
 
+def wavelet4_estimation(INPUT_PATH = '/volatile/hubert/beamer/test_hurst/wavelet4'):
+    conn = Hurst_Estimator(metric='wavelet', mask=dataset.mask, regu='tv', nb_vanishmoment=4, j1 =3, j2=7, n_jobs=5)
+    conn.fit(dataset.func1)
+    conn.save(INPUT_PATH)

@@ -44,10 +44,15 @@ def hdw_p(appro, nb_vanishmoment=2, norm=1, q=np.array(2), nbvoies=None, distn=1
         tmp = regrespond_det32(dico['Elogmuqj'][:,0], dico['Varlogmuqj'][:,0],
                              dico['nj'], j1, j2, wtype)
     
+    Nanvalue = np.isnan(tmp['Zeta'])
+    tmp['Zeta'][Nanvalue] = 0.8
+    tmp['aest'][Nanvalue] = 1
+    dico['Elogmuqj'][Nanvalue] = 0.8 * np.arange(1,dico['Elogmuqj'].shape[-1]+1)
+    dico['Varlogmuqj'][Nanvalue] = 0.4 * np.arange(1,dico['Varlogmuqj'].shape[-1]+1)
     
     return {'Elogmuqj': dico['Elogmuqj'], 'Varlogmuqj': dico['Varlogmuqj'], 'nj': dico['nj'],
             'logmuqj': dico['logmuqj'], 'Zeta': tmp['Zeta'], 'Vzeta': tmp['Vzeta'],
-            'aest': tmp['aest'], 'jj': tmp['jj']}
+            'aest': tmp['aest'], 'jj': tmp['jj'], 'Nanvalue' : Nanvalue}
 
 
 

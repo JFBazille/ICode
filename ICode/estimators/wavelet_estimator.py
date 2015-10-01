@@ -122,11 +122,14 @@ def wavelet_tv_estimator(appro, mask=None, nb_vanishmoment=2, norm=1, q=np.array
         nbvoies = min(int(np.log2(l / (2 * nb_vanishmoment + 1))), int(np.log2(l)))
 
     dico = hdw_p(appro, nb_vanishmoment, norm, q, nbvoies, distn, wtype, j1, j2, 0)
-    Elog = dico['Elogmuqj'][:, 0]
-    Varlog = dico['Varlogmuqj'][:, 0]
+    nonNanvalue = np.invert(dico['Nanvalue'])
+    Elog = dico['Elogmuqj'][:, 0][nonNanvalue]
+    Varlog = dico['Varlogmuqj'][:, 0][nonNanvalue]
     nj = dico['nj']
-    estimate = dico['Zeta'] / 2.
-    aest = dico['aest']
+    estimate = dico['Zeta'][nonNanvalue] / 2.
+    aest = dico['aest'][nonNanvalue]
+    
+    mask[mask] = np.all((mask[mask], nonNanvalue), axis=0)
     lipschitz_constant = lipschitz_constant_gradf(j1,j2,Varlog, nj, wtype)
     l1_ratio = 0
     tv_algo = lambda lbda: mtvsolver(estimate, aest,
@@ -136,8 +139,9 @@ def wavelet_tv_estimator(appro, mask=None, nb_vanishmoment=2, norm=1, q=np.array
                                l1_ratio = l1_ratio, l=lbda, verbose=0)
 
     Hmin = tv_algo(lbda)
-    
-    return estimate, Hmin[0]
+    retour = 0.4 * np.ones(dico['Zeta'].shape)
+    retour[nonNanvalue] = Hmin[0]
+    return dico['Zeta']/2, retour
 
 
 def wavelet_l2_estimator(appro, mask=None, nb_vanishmoment=2, norm=1, q=np.array(2), nbvoies=None,
@@ -181,11 +185,14 @@ def wavelet_l2_estimator(appro, mask=None, nb_vanishmoment=2, norm=1, q=np.array
         nbvoies = min(int(np.log2(l / (2 * nb_vanishmoment + 1))), int(np.log2(l)))
 
     dico = hdw_p(appro, nb_vanishmoment, norm, q, nbvoies, distn, wtype, j1, j2, 0)
-    Elog = dico['Elogmuqj'][:, 0]
-    Varlog = dico['Varlogmuqj'][:, 0]
+    nonNanvalue = np.invert(dico['Nanvalue'])
+    Elog = dico['Elogmuqj'][:, 0][nonNanvalue]
+    Varlog = dico['Varlogmuqj'][:, 0][nonNanvalue]
     nj = dico['nj']
-    estimate = dico['Zeta'] / 2.
-    aest = dico['aest']
+    estimate = dico['Zeta'][nonNanvalue] / 2.
+    aest = dico['aest'][nonNanvalue]
+    
+    mask[mask] = np.all((mask[mask], nonNanvalue), axis=0)
     f = lambda x, lbda: l2_penalization_on_grad(x, aest,
                         Elog, Varlog, nj, j1, j2, mask, l=lbda)
     #We set epsilon to 0
@@ -199,4 +206,6 @@ def wavelet_l2_estimator(appro, mask=None, nb_vanishmoment=2, norm=1, q=np.array
     
     Hmin = l2_algo(lbda)
     
-    return estimate, Hmin[0]
+    retour = 0.4 * np.ones(dico['Zeta'].shape)
+    retour[nonNanvalue] = Hmin[0]
+    return dico['Zeta']/2, retour
